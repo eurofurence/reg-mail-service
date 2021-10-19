@@ -1,0 +1,6 @@
+.idea/**
+*.exe
+main
+reg-mail-service
+**/*.swp
+config.yaml
