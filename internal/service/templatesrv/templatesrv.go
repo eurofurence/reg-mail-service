@@ -19,3 +19,8 @@ func (s *TemplateServiceImplData) GetTemplate(ctx context.Context, id string) (*
 	template, err := database.GetRepository().GetTemplateById(ctx, id)
 	return template, err
 }
+
+func (s *TemplateServiceImplData) GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error) {
+	template, err := database.GetRepository().GetTemplateByCid(ctx, cid, lang)
+	return template, err
+}

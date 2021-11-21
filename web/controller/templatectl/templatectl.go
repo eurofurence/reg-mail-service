@@ -24,7 +24,7 @@ func init() {
 func Create(server chi.Router) {
 	server.Get("/api/v1/template/check", templateCheck)
 
-	server.Get("/api/v1/template", getTemplates)
+	server.Get("/api/v1/template", getTemplateByCid)
 
 	server.Route("/api/v1/template/{uuid}", func(r chi.Router) {
 		r.Get("/", getTemplate)
@@ -54,6 +54,27 @@ func getTemplate(w http.ResponseWriter, r *http.Request) {
 	template, err := templateService.GetTemplate(r.Context(), uuid)
 	if err != nil {
 		templateNotFoundErrorHandler(r.Context(), uuid)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	dto := dto.TemplateDto{}
+	mapTemplateToDto(template, &dto)
+
+	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
+	w.WriteHeader(http.StatusOK)
+	writeJson(r.Context(), w, dto)
+}
+
+// Get Template by Common ID
+func getTemplateByCid(w http.ResponseWriter, r *http.Request) {
+	cid := r.Header.Get("cid")
+	lang := r.Header.Get("lang")
+
+	template, err := templateService.GetTemplateByCid(r.Context(), cid, lang)
+	if err != nil {
+		//templateNotFoundErrorHandler(r.Context(), uuid)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 

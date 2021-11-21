@@ -20,7 +20,7 @@ import (
 func Create(server chi.Router) {
 	server.Get("/api/v1/mail/check", mailCheck)
 
-	server.Post("/api/v1/mail/sendtemplate", sendTemplate)
+	server.Post("/api/v1/mail/send", sendTemplate)
 }
 
 func mailCheck(w http.ResponseWriter, r *http.Request) {
@@ -34,23 +34,25 @@ func mailCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendTemplate(w http.ResponseWriter, r *http.Request) {
-	// Sender
-	from := config.EmailFrom()
-	password := config.EmailFromPassword()
-	smtpHost := config.SmtpHost()
-	smtpPort := config.SmtpPort()
+	// Template
+	//cid := r.Header.Get("cid")
+	//lang := r.Header.Get("lang")
+
+	t, _ := template.ParseFiles("assets/cache/de_DE/guest.txt")
 
 	// Recipients
 	to := []string{
 		"example@example.com",
 	}
 
+	// Sender
+	from := config.EmailFrom()
+	password := config.EmailFromPassword()
+	smtpHost := config.SmtpHost()
+	smtpPort := config.SmtpPort()
+
 	// Authentication
 	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	// Load Template and fill with Variables, load from File Cache
-	// TODO: Check if File is in Cache and check Database if Cache is Up to Date
-	t, _ := template.ParseFiles("assets/cache/de_DE/guest.txt")
 
 	var body bytes.Buffer
 

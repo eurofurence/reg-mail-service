@@ -9,4 +9,5 @@ import (
 type TemplateService interface {
 	GetTemplates(ctx context.Context) (*entity.Template, error)
 	GetTemplate(ctx context.Context, id string) (*entity.Template, error)
+	GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 }
