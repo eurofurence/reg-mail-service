@@ -10,6 +10,11 @@ import (
 type TemplateServiceImplData struct {
 }
 
+func (s *TemplateServiceImplData) DeleteTemplate(ctx context.Context, uuid string) error {
+	err := database.GetRepository().DeleteTemplate(ctx, uuid)
+	return err
+}
+
 func (s *TemplateServiceImplData) GetTemplates(ctx context.Context) (*entity.Template, error) {
 	templates, err := database.GetRepository().GetTemplates(ctx)
 	return templates, err

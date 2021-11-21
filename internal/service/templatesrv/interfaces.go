@@ -8,6 +8,8 @@ import (
 
 type TemplateService interface {
 	GetTemplates(ctx context.Context) (*entity.Template, error)
+
+	DeleteTemplate(ctx context.Context, uuid string) error
 	GetTemplate(ctx context.Context, id string) (*entity.Template, error)
 	GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 }

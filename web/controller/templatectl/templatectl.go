@@ -66,6 +66,34 @@ func getTemplate(w http.ResponseWriter, r *http.Request) {
 	writeJson(r.Context(), w, dto)
 }
 
+// Update Template by UUID
+func updateTemplate(w http.ResponseWriter, r *http.Request) {
+	//uuid := chi.URLParam(r, "uuid")
+
+	//err := templateService.UpdateTemplate(r.Context(), uuid)
+	//if err != nil {
+	//templateNotFoundErrorHandler(r.Context(), uuid)
+	//w.WriteHeader(http.StatusNotFound)
+	//return
+	//}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// Delete Template by UUID
+func deleteTemplate(w http.ResponseWriter, r *http.Request) {
+	uuid := chi.URLParam(r, "uuid")
+
+	err := templateService.DeleteTemplate(r.Context(), uuid)
+	if err != nil {
+		templateNotFoundErrorHandler(r.Context(), uuid)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 // Get Template by Common ID
 func getTemplateByCid(w http.ResponseWriter, r *http.Request) {
 	cid := r.Header.Get("cid")
@@ -84,16 +112,6 @@ func getTemplateByCid(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
 	w.WriteHeader(http.StatusOK)
 	writeJson(r.Context(), w, dto)
-}
-
-// Update Template and Create if it does not exist yet
-func updateTemplate(w http.ResponseWriter, r *http.Request) {
-
-}
-
-// Remove Template by UUID
-func deleteTemplate(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func templateNotFoundErrorHandler(ctx context.Context, uuid string) {
