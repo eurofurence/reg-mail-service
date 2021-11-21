@@ -1,0 +1,41 @@
+== DATABASE FIELDS ==
+
+id: Unique Identifier (UUID)
+cid: Commen Identifier (Common ID) => Each Languages shares this ID for the given template
+lang: Template Language
+title: Template Title (Is also the Subject of the E-Mail)
+data: Template/Email Content
+created_at: Database entry creation Timestamp
+updated_at: Database entry last update Timestamp
+deleted_at: Database entry deleted Timestamp
+
+
+== TEMPLATE FIELDS ==
+
+// USER FIELDS
+{{ .VAR_NICK }} -- Nickname
+{{ .VAR_EMAIL }} -- Current Email
+{{ .VAR_ID }} -- Reg ID
+{{ .VAR_PASSWORD }} -- Password
+
+// GROUP FIELDS
+{{ .VAR_GROUP_OWNER }} -- Group Owner Nickname
+{{ .VAR_GROUP_OWNER_MAIL }} -- Group Owner Email Address
+{{ .VAR_GROUP_NAME }} -- Group Name
+{{ .VAR_GROUP_MEMBER }} -- Member name for specific Mail/Action (e.g.: Joining/Leaving Groups)
+{{ .VAR_GROUP_MEMBER_MAIL }} -- Member name for specific Mail/Action (e.g.: Joining/Leaving Groups)
+
+// MONEY FIELDS
+{{ .VAR_PAYMENT_TOTAL }} -- Total Payment Amount
+{{ .VAR_PAYMENT_REMAINING }} -- Remaining Payment Amount
+
+// TIME FIELDS
+{{ .DUE_DATE }} -- Payment Due Date
+
+// CUSTOM FIELDS
+{{ .VAR_LINK }} -- Internet link for specific Mail/Action
+{{ .VAR_REASON }} -- Reason for Specific Mail/Action
+
+
+// SPECIAL FIELDS
+{{ .VAR_NEW_EMAIL }} -- For: email_changed
