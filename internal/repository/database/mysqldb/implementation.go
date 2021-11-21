@@ -52,7 +52,6 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, e
 
 func (r *MysqlRepository) GetTemplateById(ctx context.Context, id string) (*entity.Template, error) {
 	var a entity.Template
-	r.db.LogMode(true)
 	err := r.db.First(&a, "id = ?", id).Error
 	if err != nil {
 		logging.Ctx(ctx).Info("mysql error during template select: ", err)
@@ -62,16 +61,15 @@ func (r *MysqlRepository) GetTemplateById(ctx context.Context, id string) (*enti
 
 func (r *MysqlRepository) GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error) {
 	var a entity.Template
-	r.db.LogMode(true)
-	logging.Ctx(ctx).Debug("trying to find by cid/lang: ", cid, " ", lang)
 	err := r.db.First(&a, "cid = ? AND lang = ?", cid, lang).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template select: ", err, "\nTrying en_US fallback...")
+		logging.Ctx(ctx).Info("mysql error during template select [", cid, "/", lang, "]: ", err, ". Trying en-US fallback...")
 
 		err := r.db.First(&a, "cid = ? AND lang = ?", cid, "en-US").Error
 		if err != nil {
 			logging.Ctx(ctx).Info("mysql error during template select: ", err)
 		}
+		return &a, err
 	}
 	return &a, err
 }

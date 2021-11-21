@@ -42,7 +42,7 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 
 	// Recipients
 	to := []string{
-		"example@example.com",
+		r.Header.Get("to"),
 	}
 
 	// Sender
