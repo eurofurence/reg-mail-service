@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
-	"github.com/eurofurence/reg-mail-service/internal/repository/database/historizeddb"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/mysqldb"
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 )
@@ -16,7 +15,8 @@ func Open() {
 	var r dbrepo.Repository
 	if config.DatabaseUse() == "mysql" {
 		logging.NoCtx().Info("Opening mysql database...")
-		r = historizeddb.Create(mysqldb.Create())
+		//r = historizeddb.Create(mysqldb.Create())
+		r = mysqldb.Create()
 	} else {
 		logging.NoCtx().Info("Opening inmemory database...")
 		//r = historizeddb.Create(inmemorydb.Create())

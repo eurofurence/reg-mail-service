@@ -1,7 +1,11 @@
 server:
   port: 8181
 mail:
-  from: 'no-reply@example.com'
+  cache-templates: false # Cache templates as local files
+  from: 'no-reply@example.com' # Sender E-Mail Address
+  from-password: 'email-account-password' # Sender E-Mail Passwor
+  smtp-host: 'mail.example.com' # Mailserver Host
+  smtp-port: '587' # Mailserver Port
 database:
   use: 'inmemory' # [inmemory, mysql]
   mysql:

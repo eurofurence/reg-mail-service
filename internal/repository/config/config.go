@@ -10,6 +10,18 @@ func EmailFrom() string {
 	return configurationData.Mail.From
 }
 
+func EmailFromPassword() string {
+	return configurationData.Mail.FromPass
+}
+
+func SmtpHost() string {
+	return configurationData.Mail.Host
+}
+
+func SmtpPort() string {
+	return configurationData.Mail.Port
+}
+
 func DatabaseUse() string {
 	return Configuration().Database.Use
 }

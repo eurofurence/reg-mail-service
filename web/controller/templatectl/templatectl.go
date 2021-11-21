@@ -17,8 +17,14 @@ import (
 
 var templateService templatesrv.TemplateService
 
+func init() {
+	templateService = &templatesrv.TemplateServiceImplData{}
+}
+
 func Create(server chi.Router) {
 	server.Get("/api/v1/template/check", templateCheck)
+
+	server.Get("/api/v1/template", getTemplates)
 
 	server.Route("/api/v1/template/{uuid}", func(r chi.Router) {
 		r.Get("/", getTemplate)
@@ -37,29 +43,40 @@ func templateCheck(w http.ResponseWriter, r *http.Request) {
 	writeJson(r.Context(), w, dto)
 }
 
+func getTemplates(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// Get Template by UUID
 func getTemplate(w http.ResponseWriter, r *http.Request) {
-	// Get Template by UUID
 	uuid := chi.URLParam(r, "uuid")
 
 	template, err := templateService.GetTemplate(r.Context(), uuid)
 	if err != nil {
-		//templateNotFoundErrorHandler(ctx, w, r, uuid)
+		templateNotFoundErrorHandler(r.Context(), uuid)
 		return
 	}
 
 	dto := dto.TemplateDto{}
 	mapTemplateToDto(template, &dto)
+
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
 	w.WriteHeader(http.StatusOK)
 	writeJson(r.Context(), w, dto)
 }
 
+// Update Template and Create if it does not exist yet
 func updateTemplate(w http.ResponseWriter, r *http.Request) {
-	// Update Template and Create if it does not exist yet
+
 }
 
+// Remove Template by UUID
 func deleteTemplate(w http.ResponseWriter, r *http.Request) {
-	// Remove Template by UUID
+
+}
+
+func templateNotFoundErrorHandler(ctx context.Context, uuid string) {
+	logging.Ctx(ctx).Warn("template uuid ", uuid, " not found")
 }
 
 func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {

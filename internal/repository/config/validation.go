@@ -35,6 +35,14 @@ func validateMailConfiguration(errs validationErrors, m mailConfig) {
 			addError(errs, "mail.from", m.From, "is not a valid email address")
 		}
 	}
+
+	if m.Host == "" {
+		addError(errs, "mail.smtp-host", m.Host, "cannot be empty")
+	}
+
+	if m.Port == "" {
+		addError(errs, "mail.smtp-port", m.Port, "cannot be empty")
+	}
 }
 
 func validateDatabaseConfiguration(errs url.Values, c databaseConfig) {

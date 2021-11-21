@@ -7,7 +7,7 @@ import (
 
 func mapTemplateToDto(a *entity.Template, dto *dto.TemplateDto) {
 	// this cannot fail
-	//dto.id = fmt.Sprint(a.id)
+	dto.ID = a.ID
 	dto.Lang = a.Language
 	dto.Title = a.Title
 	dto.Data = a.Data

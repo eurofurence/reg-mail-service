@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: reg-mail-service API
-  version: 0.1.0
+  version: 0.1.1
   contact:
     email: "jsquirrel_github_9a6d@packetloss.de"
   license:
@@ -24,3 +24,33 @@ paths:
                     type: string
                     enum: [up, down]
                     example: up
+  /api/v1/template:
+    /{uuid}:
+      get:
+        summary: Get template by UUID
+        description: Get the template from the Database by the UUID
+        responses:
+          '200':
+            description: Template found
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    cid:
+                      type: string
+                      example: example_cid
+                    lang:
+                      type: string
+                      enum: []
+                      example: en_US
+                    title:
+                      type: string
+                      example: Title
+                    data:
+                      type: string
+                      example: Long Template Content with Variables
+                    created_at:
+                      type: time.Time
+                    updated_at:
+                      type: time.Time

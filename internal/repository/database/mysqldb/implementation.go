@@ -37,15 +37,25 @@ func (r *MysqlRepository) Open() {
 func (r *MysqlRepository) Close() {
 	err := r.db.Close()
 	if err != nil {
-		logging.NoCtx().Fatal("failed to close mysql connection: %v", err)
+		logging.NoCtx().Fatal("failed to close mysql connection: ", err)
 	}
+}
+
+func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, error) {
+	// TODO:
+	var a entity.Template
+	err := r.db.First(&a).Error
+	if err != nil {
+		logging.Ctx(ctx).Info("mysql error during template select - might be ok: ", err)
+	}
+	return &a, err
 }
 
 func (r *MysqlRepository) GetTemplateById(ctx context.Context, id string) (*entity.Template, error) {
 	var a entity.Template
 	err := r.db.First(&a, id).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during attendee select - might be ok: %v", err)
+		logging.Ctx(ctx).Info("mysql error during template select: ", err)
 	}
 	return &a, err
 }

@@ -13,10 +13,9 @@ type Repository interface {
 
 	//AddAttendee(ctx context.Context, a *entity.Attendee) (uint, error)
 	//UpdateAttendee(ctx context.Context, a *entity.Attendee) error
-	//GetAttendeeById(ctx context.Context, id uint) (*entity.Attendee, error)
+	GetTemplates(ctx context.Context) (*entity.Template, error)
+	//GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 	GetTemplateById(ctx context.Context, id string) (*entity.Template, error)
-	//CountAttendeesByNicknameZipEmail(ctx context.Context, nickname string, zip string, email string) (int64, error)
-	//MaxAttendeeId(ctx context.Context) (uint, error)
 
 	//RecordHistory(ctx context.Context, h *entity.History) error
 }

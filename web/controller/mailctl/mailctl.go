@@ -36,9 +36,9 @@ func mailCheck(w http.ResponseWriter, r *http.Request) {
 func sendTemplate(w http.ResponseWriter, r *http.Request) {
 	// Sender
 	from := config.EmailFrom()
-	password := "pass"
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
+	password := config.EmailFromPassword()
+	smtpHost := config.SmtpHost()
+	smtpPort := config.SmtpPort()
 
 	// Recipients
 	to := []string{
@@ -49,12 +49,12 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
 	// Load Template and fill with Variables, load from File Cache
-	t, _ := template.ParseFiles("tmp/9b7585fd-4a2d-11ec-b88e-3431c4db8789.txt")
+	// TODO: Check if File is in Cache and check Database if Cache is Up to Date
+	t, _ := template.ParseFiles("assets/cache/de_DE/guest.txt")
 
 	var body bytes.Buffer
 
-	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: This is a test subject \n%s\n\n", mimeHeaders))) // TODO: Replace with actual Subject from Template
+	body.Write([]byte(fmt.Sprintf("Subject: This is a test subject \n%s\n\n", media.ContentMimeHeaders))) // TODO: Replace with actual Subject from Template
 
 	// TODO: Read Template JSON => Generate Struct => Fill Variables?
 	t.Execute(&body, struct {
@@ -72,6 +72,8 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logging.Ctx(r.Context()).Info("Template Sent Successfully!")
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {

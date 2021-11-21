@@ -24,6 +24,10 @@ func (r *HistorizingRepository) Close() {
 	r.wrappedRepository.Close()
 }
 
+func (r *HistorizingRepository) GetTemplates(ctx context.Context) (*entity.Template, error) {
+	return r.wrappedRepository.GetTemplates(ctx)
+}
+
 func (r *HistorizingRepository) GetTemplateById(ctx context.Context, id string) (*entity.Template, error) {
 	return r.wrappedRepository.GetTemplateById(ctx, id)
 }
