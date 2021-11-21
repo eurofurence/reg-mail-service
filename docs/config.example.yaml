@@ -1,4 +1,17 @@
 server:
   port: 8181
+mail:
+  from: 'no-reply@example.com'
+database:
+  use: 'inmemory' # [inmemory, mysql]
+  mysql:
+    username: 'db-user-username'
+    password: 'db-user-password'
+    database: 'tcp(localhost:3306)/db-name'
+    parameters:
+      - 'charset=utf8mb4'
+      - 'collation=utf8mb4_general_ci'
+      - 'parseTime=True'
+      - 'timeout=30s' # connection timeout
 security:
   disable_cors: false

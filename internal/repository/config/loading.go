@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"sort"
+	"sync"
 
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging/consolelogging/logformat"
 	"gopkg.in/yaml.v2"
@@ -13,10 +14,12 @@ import (
 
 var (
 	configurationData *conf
+	configurationLock *sync.RWMutex
 )
 
 func init() {
 	configurationData = &conf{}
+	configurationLock = &sync.RWMutex{}
 }
 
 func logValidationErrors(errs validationErrors) error {
@@ -55,8 +58,9 @@ func validateConfiguration(newConfigurationData *conf) error {
 	errs := validationErrors{}
 
 	validateServerConfiguration(errs, newConfigurationData.Server)
+	validateMailConfiguration(errs, newConfigurationData.Mail)
 	validateSecurityConfiguration(errs, newConfigurationData.Security)
-	// add further validations here
+	//validateDatabaseConfiguration(errs, newConfigurationData.Database)
 
 	return logValidationErrors(errs)
 }
@@ -92,4 +96,10 @@ func LoadConfiguration(configurationFilename string) error {
 
 	err = parseAndOverwriteConfig(yamlFile)
 	return err
+}
+
+func Configuration() *conf {
+	configurationLock.RLock()
+	defer configurationLock.RUnlock()
+	return configurationData
 }

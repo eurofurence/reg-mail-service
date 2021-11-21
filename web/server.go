@@ -7,6 +7,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/web/controller/healthctl"
 	"github.com/eurofurence/reg-mail-service/web/controller/mailctl"
+	"github.com/eurofurence/reg-mail-service/web/controller/templatectl"
 	"github.com/eurofurence/reg-mail-service/web/filter/corsfilter"
 	"github.com/eurofurence/reg-mail-service/web/filter/logreqid"
 	"github.com/eurofurence/reg-mail-service/web/filter/reqid"
@@ -23,6 +24,7 @@ func Create() chi.Router {
 
 	healthctl.Create(server)
 	mailctl.Create(server)
+	templatectl.Create(server)
 	return server
 }
 
