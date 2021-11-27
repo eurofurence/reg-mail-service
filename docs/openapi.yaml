@@ -24,33 +24,81 @@ paths:
                     type: string
                     enum: [up, down]
                     example: up
-  /api/v1/template:
-    /{uuid}:
-      get:
-        summary: Get template by UUID
-        description: Get the template from the Database by the UUID
-        responses:
-          '200':
-            description: Template found
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    cid:
-                      type: string
-                      example: example_cid
-                    lang:
-                      type: string
-                      enum: []
-                      example: en_US
-                    title:
-                      type: string
-                      example: Title
-                    data:
-                      type: string
-                      example: Long Template Content with Variables
-                    created_at:
-                      type: time.Time
-                    updated_at:
-                      type: time.Time
+  /api/v1/template/:
+    get:
+      summary: Get template by Common ID
+      description: The template with matching Common ID and Language is being returned.
+      responses:
+        '200':
+          description: CID & Language match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cid:
+                    type: string
+                    example: example_cid
+                  lang:
+                    type: string
+                    enum: []
+                    example: en_US
+                  title:
+                    type: string
+                    example: Title
+                  data:
+                    type: string
+                    example: Long Template Content with Variables
+                  created_at:
+                    type: time.Time
+                  updated_at:
+                    type: time.Time
+        '404':
+          description: No template found.
+  /api/v1/template/{uuid}:
+    get:
+      summary: Fetch template
+      description: Get the template from the Database by the UUID.
+      responses:
+        '200':
+          description: Template found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cid:
+                    type: string
+                    example: example_cid
+                  lang:
+                    type: string
+                    enum: []
+                    example: en_US
+                  title:
+                    type: string
+                    example: Title
+                  data:
+                    type: string
+                    example: Long Template Content with Variables
+                  created_at:
+                    type: time.Time
+                  updated_at:
+                    type: time.Time
+        '404':
+          description: Template not found.
+    post:
+      summary: Update template
+      description: Update a specific template in the Database by UUID.
+      responses:
+        '200':
+          description: Template successfully updated.
+        '404':
+          description: Template not found.
+    delete:
+      summary: Archive template
+      description: Archive a specific template by UUID.
+      responses:
+        '200':
+          description: Template successfully archived.
+        '404':
+          description: Template not found.
