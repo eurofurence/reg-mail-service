@@ -64,8 +64,17 @@ func (r *MysqlRepository) DeleteTemplate(ctx context.Context, uuid string) error
 	return err
 }
 
-func (r *MysqlRepository) UpdateTemplate(ctx context.Context, a *entity.Template) error {
-	err := r.db.Save(a).Error
+func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data string) error {
+	var temp *entity.Template
+
+	temp, err := r.GetTemplateById(ctx, uuid)
+	if err != nil {
+		logging.Ctx(ctx).Info("mysql error during template update: ", err)
+		return err
+	}
+
+	temp.Data = data
+	err = r.db.Save(temp).Error
 	if err != nil {
 		logging.Ctx(ctx).Info("mysql error during template update: ", err)
 	}

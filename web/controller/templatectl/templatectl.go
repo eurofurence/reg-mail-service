@@ -68,14 +68,15 @@ func getTemplate(w http.ResponseWriter, r *http.Request) {
 
 // Update Template by UUID
 func updateTemplate(w http.ResponseWriter, r *http.Request) {
-	//uuid := chi.URLParam(r, "uuid")
+	uuid := chi.URLParam(r, "uuid")
+	data := r.Header.Get("data")
 
-	//err := templateService.UpdateTemplate(r.Context(), uuid)
-	//if err != nil {
-	//templateNotFoundErrorHandler(r.Context(), uuid)
-	//w.WriteHeader(http.StatusNotFound)
-	//return
-	//}
+	err := templateService.UpdateTemplate(r.Context(), uuid, data)
+	if err != nil {
+		templateNotFoundErrorHandler(r.Context(), uuid)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
