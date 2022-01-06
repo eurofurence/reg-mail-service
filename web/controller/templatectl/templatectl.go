@@ -25,7 +25,10 @@ func init() {
 func Create(server chi.Router) {
 	server.Get("/api/v1/template/check", templateCheck)
 
-	server.Get("/api/v1/template", getTemplateByCid)
+	server.Route("/api/v1/template", func(r chi.Router) {
+		r.Get("/", getTemplateByCid)
+		r.Post("/", createTemplate)
+	})
 
 	server.Route("/api/v1/template/{uuid}", func(r chi.Router) {
 		r.Get("/", getTemplate)
@@ -46,6 +49,21 @@ func templateCheck(w http.ResponseWriter, r *http.Request) {
 
 func getTemplates(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func createTemplate(w http.ResponseWriter, r *http.Request) {
+	cid := r.Header.Get("cid")
+	lang := r.Header.Get("lang")
+	title := r.Header.Get("title")
+	data := r.Header.Get("data")
+
+	err := templateService.CreateTemplate(r.Context(), cid, lang, title, data)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 // Get Template by UUID

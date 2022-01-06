@@ -13,6 +13,7 @@ type Repository interface {
 
 	GetTemplates(ctx context.Context) (*entity.Template, error)
 
+	CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error
 	DeleteTemplate(ctx context.Context, uuid string, permanent bool) error
 	UpdateTemplate(ctx context.Context, uuid string, data string) error
 	GetTemplateById(ctx context.Context, id string) (*entity.Template, error)

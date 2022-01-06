@@ -10,6 +10,11 @@ import (
 type TemplateServiceImplData struct {
 }
 
+func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error {
+	err := database.GetRepository().CreateTemplate(ctx, cid, lang, title, data)
+	return err
+}
+
 func (s *TemplateServiceImplData) UpdateTemplate(ctx context.Context, uuid string, data string) error {
 	err := database.GetRepository().UpdateTemplate(ctx, uuid, data)
 	return err

@@ -50,6 +50,26 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, e
 	return &a, err
 }
 
+func (r *MysqlRepository) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error {
+	var a entity.Template
+
+	if lang == "" {
+		lang = "en-US"
+	}
+
+	a.CommonID = cid
+	a.Language = lang
+	a.Title = title
+	a.Data = data
+
+	err := r.db.Create(&a).Error
+
+	if err != nil {
+		logging.Ctx(ctx).Info("mysql error during template creation: ", err)
+	}
+	return err
+}
+
 // Note: The DeleteTemplate function does not really delete a database entry.
 // Rather it sets the 'deleted_at' timestamp, which results it not being found on the
 // get/update queries.
