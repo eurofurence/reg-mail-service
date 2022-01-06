@@ -15,8 +15,8 @@ func (s *TemplateServiceImplData) UpdateTemplate(ctx context.Context, uuid strin
 	return err
 }
 
-func (s *TemplateServiceImplData) DeleteTemplate(ctx context.Context, uuid string) error {
-	err := database.GetRepository().DeleteTemplate(ctx, uuid)
+func (s *TemplateServiceImplData) DeleteTemplate(ctx context.Context, uuid string, permanent bool) error {
+	err := database.GetRepository().DeleteTemplate(ctx, uuid, permanent)
 	return err
 }
 

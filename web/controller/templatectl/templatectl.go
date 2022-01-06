@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/eurofurence/reg-mail-service/api/v1/health"
 	dto "github.com/eurofurence/reg-mail-service/api/v1/template"
@@ -84,8 +85,14 @@ func updateTemplate(w http.ResponseWriter, r *http.Request) {
 // Delete Template by UUID
 func deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	uuid := chi.URLParam(r, "uuid")
+	permanent, err := strconv.ParseBool(r.Header.Get("permanent"))
+	if err != nil {
+		templateNotFoundErrorHandler(r.Context(), uuid)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	err := templateService.DeleteTemplate(r.Context(), uuid)
+	err = templateService.DeleteTemplate(r.Context(), uuid, permanent)
 	if err != nil {
 		templateNotFoundErrorHandler(r.Context(), uuid)
 		w.WriteHeader(http.StatusNotFound)

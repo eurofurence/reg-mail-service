@@ -55,9 +55,16 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, e
 // get/update queries.
 // This could be useful for some sort of "Archive" in the Dashboard for the Admins to restore
 // deleted templates or as some sort of Backup.
-func (r *MysqlRepository) DeleteTemplate(ctx context.Context, uuid string) error {
+func (r *MysqlRepository) DeleteTemplate(ctx context.Context, uuid string, permanent bool) error {
 	var a entity.Template
-	err := r.db.Delete(&a, "id = ?", uuid).Error
+	err := r.db.Error
+
+	if permanent {
+		err = r.db.Unscoped().Delete(&a, "id = ?", uuid).Error
+	} else {
+		err = r.db.Delete(&a, "id = ?", uuid).Error
+	}
+
 	if err != nil {
 		logging.Ctx(ctx).Info("mysql error during template deletion: ", err)
 	}

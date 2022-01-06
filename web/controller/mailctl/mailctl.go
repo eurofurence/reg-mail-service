@@ -11,10 +11,17 @@ import (
 	"github.com/eurofurence/reg-mail-service/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
+	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/eurofurence/reg-mail-service/web/util/media"
 	"github.com/go-chi/chi"
 	"github.com/go-http-utils/headers"
 )
+
+var templateService templatesrv.TemplateService
+
+func init() {
+	templateService = &templatesrv.TemplateServiceImplData{}
+}
 
 func Create(server chi.Router) {
 	server.Get("/api/v1/mail/check", mailCheck)
@@ -37,12 +44,16 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 	cid := r.Header.Get("cid")
 	lang := r.Header.Get("lang")
 
-	// TODO: Fetch Template (either from DB or Cache, if implemented) and store inside variable
-	// to be able to get also the Title and other Information from the template.
-	// In this case, CID lookup has to be used, since the language code is passed to this service.
-
 	// TODO: Should cache be implemented?
 	//t, _ := template.ParseFiles("assets/cache/de_DE/guest.txt")
+
+	// Look up template by Common ID and Language
+	// Falls back to en-US if language not found
+	temp, err := templateService.GetTemplateByCid(r.Context(), cid, lang)
+	if err != nil {
+		logging.Ctx(r.Context()).Error(err)
+		return
+	}
 
 	// Recipients
 	recipients := []string{
@@ -60,7 +71,7 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 
 	var body bytes.Buffer
 
-	body.Write([]byte(fmt.Sprintf("Subject: This is a test subject \n%s\n\n", media.ContentMimeHeaders))) // TODO: Replace with actual Subject from Template
+	body.Write([]byte(fmt.Sprintf("Subject: ", temp.Title, " \n%s\n\n", media.ContentMimeHeaders))) // TODO: Replace with actual Subject from Template
 
 	// TODO: Read Template JSON => Generate Struct => Fill Variables?
 	//t.Execute(&body, struct {
@@ -72,7 +83,7 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 	//	})
 
 	// Send
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body.Bytes())
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body.Bytes())
 	if err != nil {
 		logging.Ctx(r.Context()).Error(err)
 		return
