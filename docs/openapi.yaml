@@ -1,12 +1,32 @@
 openapi: 3.1.0
 info:
   title: reg-mail-service API
+  description: Eurofurence Registration Mail Service API
   version: 0.1.1
   contact:
     email: "jsquirrel_github_9a6d@packetloss.de"
   license:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
+servers:
+  - url: '{protocol}://localhost:{port}/api/v1'
+    description: Local development instance.
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: https
+      port:
+        description: The port all API requests listen on.
+        enum:
+          - '8181'
+        default: '8181'
+tags:
+  - name: mail
+    description: Mail Service
+  - name: template
+    description: Template Service
 paths:
   /health:
     get:
@@ -24,8 +44,27 @@ paths:
                     type: string
                     enum: [up, down]
                     example: up
-  /api/v1/template/:
+  /mail/check:
     get:
+      tags:
+        - mail
+      summary: Check Mail Service Health
+      description: The mail health check will return 200 if everything is alright.
+      responses:
+        '200':
+          description: Health OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: up
+  /template/:
+    get:
+      tags:
+        - template
       summary: Get template by Common ID
       description: The template with matching Common ID and Language is being returned.
       responses:
@@ -41,7 +80,7 @@ paths:
                     example: example_cid
                   lang:
                     type: string
-                    enum: []
+                    enum: [en_US, de_DE]
                     example: en_US
                   title:
                     type: string
@@ -55,10 +94,36 @@ paths:
                     type: time.Time
         '404':
           description: No template found.
-  /api/v1/template/{uuid}:
+  /template/check:
     get:
+      tags:
+        - template
+      summary: Check Template Service Health
+      description: The service health check will return 200 if everything is alright.
+      responses:
+        '200':
+          description: Health OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: up
+  /template/{uuid}:
+    get:
+      tags:
+        - template
       summary: Fetch template
       description: Get the template from the Database by the UUID.
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: The UUID of the template to get
       responses:
         '200':
           description: Template found.
@@ -72,7 +137,7 @@ paths:
                     example: example_cid
                   lang:
                     type: string
-                    enum: []
+                    enum: [en_US, de_DE]
                     example: en_US
                   title:
                     type: string
@@ -87,16 +152,34 @@ paths:
         '404':
           description: Template not found.
     post:
+      tags:
+        - template
       summary: Update template
       description: Update a specific template in the Database by UUID.
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: The UUID of the template to get
       responses:
         '200':
           description: Template successfully updated.
         '404':
           description: Template not found.
     delete:
+      tags:
+        - template
       summary: Archive template
       description: Archive a specific template by UUID.
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: The UUID of the template to get
       responses:
         '200':
           description: Template successfully archived.
