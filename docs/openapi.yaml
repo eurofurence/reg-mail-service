@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: reg-mail-service API
   description: Eurofurence Registration Mail Service API
@@ -23,9 +23,9 @@ servers:
           - '8181'
         default: '8181'
 tags:
-  - name: mail
+  - name: mails
     description: Mail Service
-  - name: template
+  - name: templates
     description: Template Service
 paths:
   /health:
@@ -44,77 +44,190 @@ paths:
                     type: string
                     enum: [up, down]
                     example: up
-  /mail/check:
-    get:
+  /mail:
+    post:
       tags:
-        - mail
-      summary: Check Mail Service Health
-      description: The mail health check will return 200 if everything is alright.
+        - mails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cid:
+                  type: string
+                  example: example_cid
+                lang:
+                  type: string
+                  enum: [en_US, de_DE]
+                  example: en_US
+                to:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                cc:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                bcc:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
       responses:
         '200':
-          description: Health OK
+          description: Successfully queued
+        '400':
+          description: Parameters are invalid
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: up
-  /template/:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The mail server failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+  /mail/check:
     get:
       tags:
-        - template
+        - mails
+      summary: Check Mail Server Health
+      description: The mail health check will return 200 if everything is alright.
+      responses:
+        '204':
+          description: Health OK
+        '502':
+          description: The mail server failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+  /templates:
+    get:
+      tags:
+        - templates
       summary: Get template by Common ID
       description: The template with matching Common ID and Language is being returned.
+      parameters:
+        - name: cid
+          in: query
+          description: the cid, optional, leave blank to list all cids
+          schema:
+            type: string
+            example: ready-for-payment
+        - name: lang
+          in: query
+          description: the locale, optional, leave blank to list all locales
+          schema:
+            type: string
+            example: de_DE
       responses:
         '200':
           description: CID & Language match
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  cid:
-                    type: string
-                    example: example_cid
-                  lang:
-                    type: string
-                    enum: [en_US, de_DE]
-                    example: en_US
-                  title:
-                    type: string
-                    example: Title
-                  data:
-                    type: string
-                    example: Long Template Content with Variables
-                  created_at:
-                    type: time.Time
-                  updated_at:
-                    type: time.Time
-        '404':
-          description: No template found.
-  /template/check:
-    get:
-      tags:
-        - template
-      summary: Check Template Service Health
-      description: The service health check will return 200 if everything is alright.
-      responses:
-        '200':
-          description: Health OK
+                $ref: '#/components/schemas/TemplateListDto'
+        '400':
+          description: Parameters are invalid
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: up
-  /template/{uuid}:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+    post:
+      tags:
+        - templates
+      summary: create a new template
+      description: create a new template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDto'
+      responses:
+        '201':
+          description: the template was successfully saved
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL of the created resource, ending in the assigned Badge number.
+        '400':
+          description: body or values invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '409':
+          description: A template for this cid and language already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+  /templates/{uuid}:
     get:
       tags:
-        - template
+        - templates
       summary: Fetch template
       description: Get the template from the Database by the UUID.
       parameters:
@@ -122,6 +235,7 @@ paths:
           name: uuid
           schema:
             type: string
+            format: uuid
           required: true
           description: The UUID of the template to get
       responses:
@@ -130,30 +244,37 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  cid:
-                    type: string
-                    example: example_cid
-                  lang:
-                    type: string
-                    enum: [en_US, de_DE]
-                    example: en_US
-                  title:
-                    type: string
-                    example: Title
-                  data:
-                    type: string
-                    example: Long Template Content with Variables
-                  created_at:
-                    type: time.Time
-                  updated_at:
-                    type: time.Time
+                $ref: '#/components/schemas/TemplateDto'
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
         '404':
-          description: Template not found.
-    post:
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+    put:
       tags:
-        - template
+        - templates
       summary: Update template
       description: Update a specific template in the Database by UUID.
       parameters:
@@ -164,13 +285,38 @@ paths:
           required: true
           description: The UUID of the template to get
       responses:
-        '200':
+        '204':
           description: Template successfully updated.
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
         '404':
-          description: Template not found.
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
     delete:
       tags:
-        - template
+        - templates
       summary: Archive template
       description: Archive a specific template by UUID.
       parameters:
@@ -181,7 +327,112 @@ paths:
           required: true
           description: The UUID of the template to get
       responses:
-        '200':
+        '204':
           description: Template successfully archived.
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
         '404':
-          description: Template not found.
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+components:
+  schemas:
+    ErrorDto:
+      type: object
+      required:
+        - message
+        - timestamp
+        - requestid
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The time at which the error occurred.
+          example: 2006-01-02T15:04:05+07:00
+        requestid:
+          type: string
+          description: An internal trace id assigned to the error. Used to find logs associated with errors across our services. Display to the user as something to communicate to us with inquiries about the error.
+          example: a8b7c6d5
+        message:
+          type: string
+          description: |-
+            A keyed description of the error. We do not write human readable text here because the user interface will be multi language.
+            
+            At this time, there are these values:
+            - mail.server.error (mail server failure while sending email)
+            - template.parse.error (json body parse error)
+          example: mail.server.error
+        details:
+          type: array
+          items:
+            type: string
+          description: Optional list of additional details about the error. If available, will usually contain English language technobabble.
+    TemplateListDto:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateDto'
+    TemplateDto:
+      type: object
+      required:
+        - cid
+        - lang
+        - subject
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        cid:
+          type: string
+          example: example_cid
+        lang:
+          type: string
+          enum: [en_US, de_DE]
+          example: en_US
+          description: if a language version is not available, a configurable default is used
+        subject:
+          type: string
+          example: Make money fast
+          description: the email subject
+        data:
+          type: string
+          example: 'Long Template Content with Variables in golang text/template style {{ .nickname }}'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: A shared secret used for local communication (also useful for local development)
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: A bearer or session token obtained from the auth service (which may integrate an OIDC identity provider)
