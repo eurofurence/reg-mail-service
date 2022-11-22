@@ -1,7 +1,7 @@
 == DATABASE FIELDS ==
 
 id: Unique Identifier (UUID)
-cid: Commen Identifier (Common ID) => Each Languages shares this ID for the given template
+cid: Common Identifier (Common ID) => Each Languages shares this ID for the given template
 lang: Template Language
 title: Template Title (Is also the Subject of the E-Mail)
 data: Template/Email Content

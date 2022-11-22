@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `templates` (
   `id` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT uuid(),
   `cid` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'common_id',
   `lang` enum('en-US','en-GB','de-DE','de-CH','es-ES','fr-FR','it-IT','nl-NL','pl-PL','ru-RU') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
-  `title` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Enter Title',
+  `subject` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Enter E-Mail Subject',
   `data` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NULL',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `templates` (
 
 -- Dumping data for table reg-mail-service.templates: ~38 rows (approximately)
 /*!40000 ALTER TABLE `templates` DISABLE KEYS */;
-INSERT INTO `templates` (`id`, `cid`, `lang`, `title`, `data`, `created_at`, `updated_at`, `deleted_at`) VALUES
+INSERT INTO `templates` (`id`, `cid`, `lang`, `subject`, `data`, `created_at`, `updated_at`, `deleted_at`) VALUES
 	('07674143-4a32-11ec-b88e-3431c4db8789', 'reset_password', 'en-US', 'Reset Password', 'Dear {{ .VAR_NICK }},\n\nSomeone - hopefully you - has clicked on the \'Forgot Password\' link in \nthe Eurofurence registration system. If you want to change your \npassword, please click on this link:\n\n{{ .VAR_LINK }}\n\nIf this was not you, simply disregard this mail.\n\nIf you have any questions, feel free to email us. Simply reply to this \nmessage. More information on Eurofurence is available at\n\n       http://www.eurofurence.org/\n\nYours,\n\nThe Eurofurence Team', '2021-11-20 19:45:27', '2021-11-21 11:59:22', NULL),
 	('0768ab9c-4a32-11ec-b88e-3431c4db8789', 'reset_password', 'de-DE', 'Passwort Zurücksetzen', 'Hallo {{ .VAR_NICK }},\n\nJemand - hoffentlich du selbst - hat auf den \'Forgot Password\' Link auf \nder Eurofurence-Webseite geklickt. Wenn du dein Passwort ändern \nmöchtest, folge bitte diesem Link:\n\n{{ .VAR_LINK }}\n\nAndernfalls ignoriere einfach diese Mail.\n\nWenn du Fragen hast, schreibe uns eine E-Mail. Es genügt, auf diese Mail \nzu antworten. Mehr Informationen über Eurofurence gibt es hier:\n\n       http://www.eurofurence.org/\n\nGrüße\n\nDas Eurofurence Team', '2021-11-20 19:45:27', '2021-11-21 11:59:23', NULL),
 	('076943b0-4a32-11ec-b88e-3431c4db8789', 'new', 'en-US', 'New', 'Dear {{ .VAR_NICK }},\n\nthis is an automated verification message from the Eurofurence \nregistration system. We have received your registration for Eurofurence, \nEurope\'s largest annual furry convention.\n\nYour status is: NEW - We have received your application\n\nA space at Eurofurence has NOT yet been reserved for you. You first have \nto verify your email address and confirm your registration by clicking \non the following link:\n\n{{ .VAR_LINK }}\n\nOnce you have done this, your registration will be processed further. \nYour registration will then be reviewed by our staff, and you should \nreceive another mail from us within a couple of days.\n\nIf you have any questions, feel free to email us. Simply reply to this \nmessage. More information on Eurofurence is available at\n\n       http://www.eurofurence.org/\n\nYours,\n\nThe Eurofurence Team', '2021-11-20 19:45:27', '2021-11-21 11:59:10', NULL),

@@ -11,6 +11,14 @@ type serverConfig struct {
 	Port string `yaml:"port"`
 }
 
+//type loggingConfig struct {
+//	Severity string `yaml:"severity"`
+//}
+
+type fixedTokenConfig struct {
+	Api string `yaml:"api"` // shared-secret for server-to-server backend authentication
+}
+
 type mailConfig struct {
 	From     string `yaml:"from"`
 	FromPass string `yaml:"from-password"`
@@ -24,7 +32,8 @@ type databaseConfig struct {
 }
 
 type securityConfig struct {
-	DisableCors bool `yaml:"disable_cors"`
+	Fixed       fixedTokenConfig `yaml:"fixed_token"`
+	DisableCors bool             `yaml:"disable_cors"`
 }
 
 type mysqlConfig struct {

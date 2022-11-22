@@ -1,12 +1,17 @@
 package mailctl
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	aulogging "github.com/StephanHCB/go-autumn-logging"
+	"github.com/eurofurence/reg-mail-service/api/v1/mail"
+	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
 	"net/http"
 	"net/smtp"
+	"net/url"
+	"strings"
 
 	"github.com/eurofurence/reg-mail-service/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
@@ -24,12 +29,12 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Get("/api/v1/mail/check", mailCheck)
+	server.Post("/api/v1/mail", sendMail)
 
-	server.Post("/api/v1/mail/send", sendTemplate)
+	server.Get("/api/v1/mail/check", checkHealth)
 }
 
-func mailCheck(w http.ResponseWriter, r *http.Request) {
+func checkHealth(w http.ResponseWriter, r *http.Request) {
 	logging.Ctx(r.Context()).Info("mail health")
 
 	dto := health.HealthResultDto{Status: "up"}
@@ -39,26 +44,31 @@ func mailCheck(w http.ResponseWriter, r *http.Request) {
 	writeJson(r.Context(), w, dto)
 }
 
-func sendTemplate(w http.ResponseWriter, r *http.Request) {
-	// Template
-	cid := r.Header.Get("cid")
-	lang := r.Header.Get("lang")
+func sendMail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	// TODO: Should cache be implemented?
-	//t, _ := template.ParseFiles("assets/cache/de_DE/guest.txt")
+	// Parse the received body data to a "MailSendDto"
+	dto, err := parseBodyToMailSendDto(ctx, w, r)
+	if err != nil {
+		mailParseErrorHandler(r.Context(), w, r, err)
+		return
+	}
+
+	if len(dto.To) == 0 {
+		mailParseErrorHandler(r.Context(), w, r, errors.New("recipient 'to' cannot be empty"))
+		return
+	}
 
 	// Look up template by Common ID and Language
 	// Falls back to en-US if language not found
-	temp, err := templateService.GetTemplateByCid(r.Context(), cid, lang)
+	template, err := templateService.GetTemplateByCid(r.Context(), dto.CommonID, dto.Lang)
 	if err != nil {
-		logging.Ctx(r.Context()).Error(err)
+		mailParseErrorHandler(r.Context(), w, r, err)
 		return
 	}
 
 	// Recipients
-	recipients := []string{
-		r.Header.Get("recipient"),
-	}
+	recipients := append(dto.To, dto.Cc...)
 
 	// Sender
 	from := config.EmailFrom()
@@ -69,28 +79,39 @@ func sendTemplate(w http.ResponseWriter, r *http.Request) {
 	// Authentication
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
-	var body bytes.Buffer
+	// Prepare E-Mail Content
+	tempResult := template.Data
 
-	body.Write([]byte(fmt.Sprintf("Subject: ", temp.Title, " \n%s\n\n", media.ContentMimeHeaders))) // TODO: Replace with actual Subject from Template
+	for k, v := range dto.Variables {
+		tempResult = strings.ReplaceAll(tempResult, "{{ ."+k+" }}", v)
+	}
 
-	// TODO: Read Template JSON => Generate Struct => Fill Variables?
-	//t.Execute(&body, struct {
-	//	Var1 string
-	//		Var2 string
-	//	}{
-	//		Var1: "Foo Bar",
-	//		Var2: "This is a test message in a Plain-Text template",
-	//	})
+	body := []byte("To: " + strings.Join(dto.To, ";") + "\r\n" +
+		"Cc: " + strings.Join(dto.Cc, ";") + "\r\n" +
+		"Bcc: " + strings.Join(dto.Bcc, ";") + "\r\n" +
+		"Subject: " + template.Subject + "\r\n" +
+		"\r\n" +
+		tempResult + "\r\n")
 
-	// Send
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body.Bytes())
+	// Send the finished E-Mail
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body)
 	if err != nil {
-		logging.Ctx(r.Context()).Error(err)
+		mailServerErrorHandler(r.Context(), w, r, err)
 		return
 	}
-	logging.Ctx(r.Context()).Info("Mail with template (", cid, "/", lang, ") sent to: ", recipients)
+	logging.Ctx(r.Context()).Info("Mail with template (", dto.CommonID, "/", dto.Lang, ") sent. TO: ", dto.To, ". CC: ", dto.Cc, ". BCC: ", dto.Bcc)
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func parseBodyToMailSendDto(ctx context.Context, w http.ResponseWriter, r *http.Request) (*mail.MailSendDto, error) {
+	decoder := json.NewDecoder(r.Body)
+	dto := &mail.MailSendDto{}
+	err := decoder.Decode(dto)
+	if err != nil {
+		mailParseErrorHandler(ctx, w, r, err)
+	}
+	return dto, err
 }
 
 func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
@@ -100,4 +121,16 @@ func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
 	if err != nil {
 		logging.Ctx(ctx).Warn(fmt.Sprintf("error while encoding json response: %v", err))
 	}
+}
+
+// --- error handlers ---
+
+func mailServerErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mail could not be sent: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "mail.server.error", http.StatusBadGateway, url.Values{"error": {err.Error()}})
+}
+
+func mailParseErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mail send json body parse error: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "mail.parse.error", http.StatusBadRequest, url.Values{"error": {err.Error()}})
 }

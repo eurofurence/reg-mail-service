@@ -32,6 +32,15 @@ func DatabaseMysqlConnectString() string {
 		c.Database + "?" + strings.Join(c.Parameters, "&")
 }
 
+func LoggingSeverity() string {
+	//return Configuration().Logging.Severity
+	return ""
+}
+
+func FixedApiToken() string {
+	return Configuration().Security.Fixed.Api
+}
+
 func IsCorsDisabled() bool {
 	return configuration().Security.DisableCors
 }

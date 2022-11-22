@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	aulogging "github.com/StephanHCB/go-autumn-logging"
+	"github.com/eurofurence/reg-mail-service/api/v1/template"
+	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/eurofurence/reg-mail-service/api/v1/health"
-	dto "github.com/eurofurence/reg-mail-service/api/v1/template"
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/eurofurence/reg-mail-service/web/util/media"
@@ -23,16 +26,14 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Get("/api/v1/template/check", templateCheck)
-
-	server.Route("/api/v1/template", func(r chi.Router) {
-		r.Get("/", getTemplateByCid)
+	server.Route("/api/v1/templates", func(r chi.Router) {
+		r.Get("/", getTemplates)
 		r.Post("/", createTemplate)
 	})
 
-	server.Route("/api/v1/template/{uuid}", func(r chi.Router) {
+	server.Route("/api/v1/templates/{uuid}", func(r chi.Router) {
 		r.Get("/", getTemplate)
-		r.Post("/", updateTemplate)
+		r.Put("/", updateTemplate)
 		r.Delete("/", deleteTemplate)
 	})
 }
@@ -47,19 +48,18 @@ func templateCheck(w http.ResponseWriter, r *http.Request) {
 	writeJson(r.Context(), w, dto)
 }
 
-func getTemplates(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func createTemplate(w http.ResponseWriter, r *http.Request) {
-	cid := r.Header.Get("cid")
-	lang := r.Header.Get("lang")
-	title := r.Header.Get("title")
-	data := r.Header.Get("data")
+	ctx := r.Context()
 
-	err := templateService.CreateTemplate(r.Context(), cid, lang, title, data)
+	dto, err := parseBodyToTemplateDto(ctx, w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		templateParseErrorHandler(r.Context(), w, r, err)
+		return
+	}
+
+	err = templateService.CreateTemplate(r.Context(), dto.CommonID, dto.Lang, dto.Subject, dto.Data)
+	if err != nil {
+		templateInvalidErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -68,32 +68,35 @@ func createTemplate(w http.ResponseWriter, r *http.Request) {
 
 // Get Template by UUID
 func getTemplate(w http.ResponseWriter, r *http.Request) {
-	uuid := chi.URLParam(r, "uuid")
+	ctx := r.Context()
 
-	template, err := templateService.GetTemplate(r.Context(), uuid)
+	dto, err := parseBodyToTemplateDto(ctx, w, r)
 	if err != nil {
-		templateNotFoundErrorHandler(r.Context(), uuid)
-		w.WriteHeader(http.StatusNotFound)
+		templateParseErrorHandler(r.Context(), w, r, err)
 		return
 	}
 
-	dto := dto.TemplateDto{}
-	mapTemplateToDto(template, &dto)
+	temp, err := templateService.GetTemplate(r.Context(), dto.UUID)
+	if err != nil {
+		templateInvalidErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
 	w.WriteHeader(http.StatusOK)
-	writeJson(r.Context(), w, dto)
+	writeJson(r.Context(), w, temp)
 }
 
 // Update Template by UUID
 func updateTemplate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	uuid := chi.URLParam(r, "uuid")
 	data := r.Header.Get("data")
 
 	err := templateService.UpdateTemplate(r.Context(), uuid, data)
 	if err != nil {
-		templateNotFoundErrorHandler(r.Context(), uuid)
-		w.WriteHeader(http.StatusNotFound)
+		templateInvalidErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -102,18 +105,23 @@ func updateTemplate(w http.ResponseWriter, r *http.Request) {
 
 // Delete Template by UUID
 func deleteTemplate(w http.ResponseWriter, r *http.Request) {
-	uuid := chi.URLParam(r, "uuid")
-	permanent, err := strconv.ParseBool(r.Header.Get("permanent"))
+	ctx := r.Context()
+
+	dto, err := parseBodyToTemplateDto(ctx, w, r)
 	if err != nil {
-		templateNotFoundErrorHandler(r.Context(), uuid)
-		w.WriteHeader(http.StatusBadRequest)
+		templateParseErrorHandler(r.Context(), w, r, err)
 		return
 	}
 
-	err = templateService.DeleteTemplate(r.Context(), uuid, permanent)
+	permanent, err := strconv.ParseBool(r.Header.Get("permanent"))
 	if err != nil {
-		templateNotFoundErrorHandler(r.Context(), uuid)
-		w.WriteHeader(http.StatusNotFound)
+		templateParseErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	err = templateService.DeleteTemplate(r.Context(), dto.UUID, permanent)
+	if err != nil {
+		templateInvalidErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -121,27 +129,24 @@ func deleteTemplate(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get Template by Common ID
-func getTemplateByCid(w http.ResponseWriter, r *http.Request) {
-	cid := r.Header.Get("cid")
-	lang := r.Header.Get("lang")
+func getTemplates(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	template, err := templateService.GetTemplateByCid(r.Context(), cid, lang)
+	dto, err := parseBodyToTemplateDto(ctx, w, r)
 	if err != nil {
-		//templateNotFoundErrorHandler(r.Context(), uuid)
-		w.WriteHeader(http.StatusNotFound)
+		templateParseErrorHandler(r.Context(), w, r, err)
 		return
 	}
 
-	dto := dto.TemplateDto{}
-	mapTemplateToDto(template, &dto)
+	temp, err := templateService.GetTemplateByCid(r.Context(), dto.CommonID, dto.Lang)
+	if err != nil {
+		templateInvalidErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
 	w.WriteHeader(http.StatusOK)
-	writeJson(r.Context(), w, dto)
-}
-
-func templateNotFoundErrorHandler(ctx context.Context, uuid string) {
-	logging.Ctx(ctx).Warn("template uuid ", uuid, " not found")
+	writeJson(r.Context(), w, temp)
 }
 
 func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
@@ -151,4 +156,31 @@ func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
 	if err != nil {
 		logging.Ctx(ctx).Warn(fmt.Sprintf("error while encoding json response: %v", err))
 	}
+}
+
+func parseBodyToTemplateDto(ctx context.Context, w http.ResponseWriter, r *http.Request) (*template.TemplateDto, error) {
+	decoder := json.NewDecoder(r.Body)
+	dto := &template.TemplateDto{}
+	err := decoder.Decode(dto)
+	if err != nil {
+		templateParseErrorHandler(ctx, w, r, err)
+	}
+	return dto, err
+}
+
+// --- error handlers ---
+
+func templateServerError(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template database error: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "template.server.error", http.StatusBadGateway, url.Values{"error": {err.Error()}})
+}
+
+func templateInvalidErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template could not be found: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "template.invalid.error", http.StatusNotFound, url.Values{"error": {err.Error()}})
+}
+
+func templateParseErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template body could not be parsed: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "template.parse.error", http.StatusBadRequest, url.Values{"error": {err.Error()}})
 }

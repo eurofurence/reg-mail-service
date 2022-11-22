@@ -50,7 +50,7 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, e
 	return &a, err
 }
 
-func (r *MysqlRepository) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error {
+func (r *MysqlRepository) CreateTemplate(ctx context.Context, cid string, lang string, subject string, data string) error {
 	var a entity.Template
 
 	if lang == "" {
@@ -59,7 +59,7 @@ func (r *MysqlRepository) CreateTemplate(ctx context.Context, cid string, lang s
 
 	a.CommonID = cid
 	a.Language = lang
-	a.Title = title
+	a.Subject = subject
 	a.Data = data
 
 	err := r.db.Create(&a).Error

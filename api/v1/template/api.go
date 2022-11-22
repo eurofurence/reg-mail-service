@@ -1,12 +1,12 @@
-package dto
+package template
 
 import "time"
 
 type TemplateDto struct {
-	ID        string    `json:"id"`
+	UUID      string    `json:"uuid"`
 	CommonID  string    `json:"cid"`
 	Lang      string    `json:"lang"`
-	Title     string    `json:"title"`
+	Subject   string    `json:"subject"`
 	Data      string    `json:"data"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

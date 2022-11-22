@@ -7,9 +7,9 @@ import (
 
 func mapTemplateToDto(a *entity.Template, dto *dto.TemplateDto) {
 	// this cannot fail
-	dto.ID = a.ID
+	dto.UUID = a.ID
 	dto.Lang = a.Language
-	dto.Title = a.Title
+	dto.Subject = a.Subject
 	dto.Data = a.Data
 	dto.CreatedAt = a.CreatedAt
 	dto.UpdatedAt = a.UpdatedAt

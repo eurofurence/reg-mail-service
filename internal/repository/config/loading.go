@@ -25,7 +25,7 @@ func init() {
 func logValidationErrors(errs validationErrors) error {
 	if len(errs) != 0 {
 		var keys []string
-		for key, _ := range errs {
+		for key := range errs {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
@@ -58,6 +58,7 @@ func validateConfiguration(newConfigurationData *conf) error {
 	errs := validationErrors{}
 
 	validateServerConfiguration(errs, newConfigurationData.Server)
+	//validateLoggingConfiguration(errs, newConfigurationData.Logging)
 	validateMailConfiguration(errs, newConfigurationData.Mail)
 	validateSecurityConfiguration(errs, newConfigurationData.Security)
 	//validateDatabaseConfiguration(errs, newConfigurationData.Database)

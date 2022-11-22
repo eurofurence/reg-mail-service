@@ -1,7 +1,8 @@
 server:
   port: 8181
+logging:
+  severity: INFO
 mail:
-  cache-templates: false # Cache templates as local files
   from: 'no-reply@example.com' # Sender E-Mail Address
   from-password: 'email-account-password' # Sender E-Mail Passwor
   smtp-host: 'mail.example.com' # Mailserver Host
@@ -18,4 +19,6 @@ database:
       - 'parseTime=True'
       - 'timeout=30s' # connection timeout
 security:
+  fixed_token:
+    api: 'put_secure_random_string_here_for_api_token'
   disable_cors: false

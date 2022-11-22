@@ -410,8 +410,8 @@ components:
           example: example_cid
         lang:
           type: string
-          enum: [en_US, de_DE]
-          example: en_US
+          enum: [en-US, de-DE]
+          example: en-US
           description: if a language version is not available, a configurable default is used
         subject:
           type: string
