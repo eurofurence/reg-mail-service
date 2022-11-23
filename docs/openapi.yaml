@@ -283,7 +283,12 @@ paths:
           schema:
             type: string
           required: true
-          description: The UUID of the template to get
+          description: The UUID of the template to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDto'
       responses:
         '204':
           description: Template successfully updated.
@@ -405,6 +410,7 @@ components:
         uuid:
           type: string
           format: uuid
+          description: the id of the template. Ignored on incoming request. If specified, must match the uuid from the path, and must be empty for creation.
         cid:
           type: string
           example: example_cid
