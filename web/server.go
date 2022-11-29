@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/StephanHCB/go-autumn-logging-zerolog/loggermiddleware"
 	"github.com/eurofurence/reg-mail-service/web/middleware"
 	"net/http"
 
@@ -9,9 +10,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/web/controller/healthctl"
 	"github.com/eurofurence/reg-mail-service/web/controller/mailctl"
 	"github.com/eurofurence/reg-mail-service/web/controller/templatectl"
-	"github.com/eurofurence/reg-mail-service/web/filter/corsfilter"
-	"github.com/eurofurence/reg-mail-service/web/filter/logreqid"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 func Create() chi.Router {
@@ -19,9 +18,11 @@ func Create() chi.Router {
 	server := chi.NewRouter()
 
 	server.Use(middleware.AddRequestIdToContextAndResponse)
-	server.Use(logreqid.LogRequestIdMiddleware())
-	server.Use(corsfilter.CorsHeadersMiddleware())
-	// server.Use(middleware.TokenValidator) //TODO: Fix Token Validation
+	server.Use(loggermiddleware.AddZerologLoggerToContext)
+	server.Use(middleware.RequestLogger)
+	server.Use(middleware.PanicRecoverer)
+	server.Use(middleware.CorsHandling)
+	server.Use(middleware.TokenValidator)
 
 	healthctl.Create(server)
 	mailctl.Create(server)
@@ -30,6 +31,8 @@ func Create() chi.Router {
 }
 
 func Serve(server chi.Router) {
+	setupLogging("attendee-service", config.UseEcsLogging())
+
 	address := config.ServerAddr()
 	logging.NoCtx().Info("Listening on " + address)
 	err := http.ListenAndServe(address, server)

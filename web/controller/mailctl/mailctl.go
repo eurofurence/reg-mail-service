@@ -18,7 +18,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/eurofurence/reg-mail-service/web/util/media"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
 )
 

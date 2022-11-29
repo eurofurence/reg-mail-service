@@ -387,6 +387,9 @@ components:
             At this time, there are these values:
             - mail.server.error (mail server failure while sending email)
             - template.parse.error (json body parse error)
+            - template.database.error
+            - template.notfound.error
+            - template.invalid.error
           example: mail.server.error
         details:
           type: array

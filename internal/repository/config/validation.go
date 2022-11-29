@@ -1,7 +1,9 @@
 package config
 
 import (
+	"crypto/rsa"
 	"fmt"
+	"github.com/golang-jwt/jwt/v4"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -50,4 +52,13 @@ func validateDatabaseConfiguration(errs url.Values, c databaseConfig) {
 }
 
 func validateSecurityConfiguration(errs validationErrors, sc securityConfig) {
+	parsedKeySet = make([]*rsa.PublicKey, 0)
+	for i, keyStr := range sc.Oidc.TokenPublicKeysPEM {
+		publicKeyPtr, err := jwt.ParseRSAPublicKeyFromPEM([]byte(keyStr))
+		if err != nil {
+			addError(errs, fmt.Sprintf("security.oidc.token_public_keys_PEM[%d]", i), "(redacted)", fmt.Sprintf("failed to parse RSA public key in PEM format: %s", err.Error()))
+		} else {
+			parsedKeySet = append(parsedKeySet, publicKeyPtr)
+		}
+	}
 }

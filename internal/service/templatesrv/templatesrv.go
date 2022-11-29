@@ -2,6 +2,7 @@ package templatesrv
 
 import (
 	"context"
+	"github.com/google/uuid"
 
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database"
@@ -10,12 +11,29 @@ import (
 type TemplateServiceImplData struct {
 }
 
-func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error {
-	err := database.GetRepository().CreateTemplate(ctx, cid, lang, title, data)
-	return err
+func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) (string, error) {
+	var a entity.Template
+
+	if lang == "" {
+		lang = "en-US"
+	}
+
+	newId, err := uuid.NewUUID()
+	if err != nil {
+		return "", err
+	}
+
+	a.ID = newId.String()
+	a.CommonID = cid
+	a.Language = lang
+	a.Subject = title
+	a.Data = data
+
+	err = database.GetRepository().CreateTemplate(ctx, &a)
+	return a.ID, err
 }
 
-func (s *TemplateServiceImplData) UpdateTemplate(ctx context.Context, uuid string, data string) error {
+func (s *TemplateServiceImplData) UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error {
 	err := database.GetRepository().UpdateTemplate(ctx, uuid, data)
 	return err
 }
@@ -25,7 +43,7 @@ func (s *TemplateServiceImplData) DeleteTemplate(ctx context.Context, uuid strin
 	return err
 }
 
-func (s *TemplateServiceImplData) GetTemplates(ctx context.Context) (*entity.Template, error) {
+func (s *TemplateServiceImplData) GetTemplates(ctx context.Context) ([]*entity.Template, error) {
 	templates, err := database.GetRepository().GetTemplates(ctx)
 	return templates, err
 }

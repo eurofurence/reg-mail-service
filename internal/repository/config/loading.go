@@ -1,7 +1,9 @@
 package config
 
 import (
+	"crypto/rsa"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,13 +15,27 @@ import (
 )
 
 var (
-	configurationData *conf
-	configurationLock *sync.RWMutex
+	configurationData     *conf
+	configurationLock     *sync.RWMutex
+	configurationFilename string
+	dbMigrate             bool
+	ecsLogging            bool
+
+	parsedKeySet []*rsa.PublicKey
 )
 
 func init() {
 	configurationData = &conf{}
 	configurationLock = &sync.RWMutex{}
+
+	flag.StringVar(&configurationFilename, "config", "config.yaml", "config file path")
+	flag.BoolVar(&dbMigrate, "migrate-database", false, "migrate database on startup")
+	flag.BoolVar(&ecsLogging, "ecs-json-logging", false, "switch to structured json logging")
+}
+
+// ParseCommandLineFlags is exposed separately so you can skip it for tests
+func ParseCommandLineFlags() {
+	flag.Parse()
 }
 
 func logValidationErrors(errs validationErrors) error {

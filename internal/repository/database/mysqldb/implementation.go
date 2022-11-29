@@ -2,6 +2,7 @@ package mysqldb
 
 import (
 	"context"
+	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"time"
 
 	"github.com/eurofurence/reg-mail-service/internal/entity"
@@ -41,29 +42,37 @@ func (r *MysqlRepository) Close() {
 	}
 }
 
-func (r *MysqlRepository) GetTemplates(ctx context.Context) (*entity.Template, error) {
-	var a entity.Template
-	err := r.db.First(&a).Error
+func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template, error) {
+	result := make([]*entity.Template, 0)
+	buffer := entity.Template{}
+
+	rows, err := r.db.Order("id").Find(&buffer).Rows()
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during selection of templates: ", err)
+		aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("mysql error during selection of templates:  %s", err.Error())
+		return result, err
 	}
-	return &a, err
+	defer func() {
+		err2 := rows.Close()
+		if err2 != nil {
+			aulogging.Logger.Ctx(ctx).Warn().WithErr(err2).Printf("secondary error closing recordset during find: %s", err2.Error())
+		}
+	}()
+
+	for rows.Next() {
+		err = rows.Scan(&buffer)
+		if err != nil {
+			aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("error reading template during find: %s", err.Error())
+			return result, err
+		}
+		copied := buffer
+		result = append(result, &copied)
+	}
+
+	return result, nil
 }
 
-func (r *MysqlRepository) CreateTemplate(ctx context.Context, cid string, lang string, subject string, data string) error {
-	var a entity.Template
-
-	if lang == "" {
-		lang = "en-US"
-	}
-
-	a.CommonID = cid
-	a.Language = lang
-	a.Subject = subject
-	a.Data = data
-
-	err := r.db.Create(&a).Error
-
+func (r *MysqlRepository) CreateTemplate(ctx context.Context, tpl *entity.Template) error {
+	err := r.db.Create(&tpl).Error
 	if err != nil {
 		logging.Ctx(ctx).Info("mysql error during template creation: ", err)
 	}
@@ -91,7 +100,7 @@ func (r *MysqlRepository) DeleteTemplate(ctx context.Context, uuid string, perma
 	return err
 }
 
-func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data string) error {
+func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error {
 	var temp *entity.Template
 
 	temp, err := r.GetTemplateById(ctx, uuid)
@@ -100,7 +109,11 @@ func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data 
 		return err
 	}
 
-	temp.Data = data
+	temp.Data = data.Data
+	temp.Subject = data.Subject
+	temp.CommonID = data.CommonID
+	temp.Language = data.Language
+
 	err = r.db.Save(temp).Error
 	if err != nil {
 		logging.Ctx(ctx).Info("mysql error during template update: ", err)

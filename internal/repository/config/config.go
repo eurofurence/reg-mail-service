@@ -1,6 +1,9 @@
 package config
 
-import "strings"
+import (
+	"crypto/rsa"
+	"strings"
+)
 
 func ServerAddr() string {
 	return ":" + configuration().Server.Port
@@ -33,14 +36,34 @@ func DatabaseMysqlConnectString() string {
 }
 
 func LoggingSeverity() string {
-	//return Configuration().Logging.Severity
-	return ""
+	return Configuration().Logging.Severity
 }
 
 func FixedApiToken() string {
 	return Configuration().Security.Fixed.Api
 }
 
+func OidcTokenCookieName() string {
+	return Configuration().Security.Oidc.TokenCookieName
+}
+
+func OidcKeySet() []*rsa.PublicKey {
+	// TODO implement parsing during validation
+	return parsedKeySet
+}
+
+func OidcAdminRole() string {
+	return Configuration().Security.Oidc.AdminRole
+}
+
 func IsCorsDisabled() bool {
 	return configuration().Security.DisableCors
+}
+
+func CorsAllowOrigin() string {
+	return Configuration().Security.CorsAllowOrigin
+}
+
+func UseEcsLogging() bool {
+	return ecsLogging
 }

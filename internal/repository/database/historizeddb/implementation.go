@@ -24,19 +24,19 @@ func (r *HistorizingRepository) Close() {
 	r.wrappedRepository.Close()
 }
 
-func (r *HistorizingRepository) GetTemplates(ctx context.Context) (*entity.Template, error) {
+func (r *HistorizingRepository) GetTemplates(ctx context.Context) ([]*entity.Template, error) {
 	return r.wrappedRepository.GetTemplates(ctx)
 }
 
-func (r *HistorizingRepository) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error {
-	panic("implement me")
+func (r *HistorizingRepository) CreateTemplate(ctx context.Context, tpl *entity.Template) error {
+	return r.wrappedRepository.CreateTemplate(ctx, tpl)
 }
 
 func (r *HistorizingRepository) DeleteTemplate(ctx context.Context, uuid string, permanent bool) error {
 	panic("implement me")
 }
 
-func (r *HistorizingRepository) UpdateTemplate(ctx context.Context, uuid string, data string) error {
+func (r *HistorizingRepository) UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error {
 	panic("implement me")
 }
 

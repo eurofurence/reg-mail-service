@@ -11,11 +11,11 @@ type Repository interface {
 	Close()
 	//Migrate()
 
-	GetTemplates(ctx context.Context) (*entity.Template, error)
+	GetTemplates(ctx context.Context) ([]*entity.Template, error)
 
-	CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) error
+	CreateTemplate(ctx context.Context, tpl *entity.Template) error
 	DeleteTemplate(ctx context.Context, uuid string, permanent bool) error
-	UpdateTemplate(ctx context.Context, uuid string, data string) error
+	UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error
 	GetTemplateById(ctx context.Context, id string) (*entity.Template, error)
 	GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 

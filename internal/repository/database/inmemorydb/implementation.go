@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
-	"github.com/google/uuid"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )
@@ -26,41 +25,25 @@ func (r *InmemoryRepository) Close() {
 	r.internalStore = nil
 }
 
-func (r *InmemoryRepository) GetTemplates(ctx context.Context) (*entity.Template, error) {
+func (r *InmemoryRepository) GetTemplates(ctx context.Context) ([]*entity.Template, error) {
+	result := make([]*entity.Template, 0)
 	for _, value := range r.internalStore {
 		copiedTemplate := *value
-		return &copiedTemplate, nil
+		result = append(result, &copiedTemplate)
 	}
-	return &entity.Template{}, errors.New("no templates found in db")
-
-	// should return a slice with all templates
+	return result, nil
 }
 
-func (r *InmemoryRepository) CreateTemplate(ctx context.Context, cid string, lang string, subject string, data string) error {
+func (r *InmemoryRepository) CreateTemplate(ctx context.Context, tpl *entity.Template) error {
 	// should take a filled entity and just add the id
 	// also note, GORM ids are normally uint, not uuids
 
-	newId, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
+	tpl.CreatedAt = time.Time{}
+	tpl.UpdatedAt = time.Time{}
 
-	newTemplate := &entity.Template{
-		Base: entity.Base{
-			ID:        newId.String(),
-			CreatedAt: time.Time{},
-			UpdatedAt: time.Time{},
-			DeletedAt: nil,
-		},
-		CommonID: cid,
-		Language: lang,
-		Subject:  subject,
-		Data:     data,
-	}
+	tplCopy := *tpl
+	r.internalStore[tpl.ID] = &tplCopy
 
-	r.internalStore[newId.String()] = newTemplate
-
-	// need to return id
 	return nil
 }
 
@@ -83,8 +66,21 @@ func (r *InmemoryRepository) DeleteTemplate(ctx context.Context, uuid string, pe
 	return nil
 }
 
-func (r *InmemoryRepository) UpdateTemplate(ctx context.Context, uuid string, data string) error {
-	// should take an updated entity, or needs subject
+func (r *InmemoryRepository) UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error {
+	tpl, err := r.GetTemplateById(ctx, uuid)
+	if err != nil {
+		return err
+	}
+
+	tpl.Data = data.Data
+	tpl.Subject = data.Subject
+	tpl.CommonID = data.CommonID
+	tpl.Language = data.Language
+
+	// TODO ensure uniqueness?
+
+	r.internalStore[tpl.ID] = tpl
+
 	return nil
 }
 

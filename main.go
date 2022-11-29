@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	config.ParseCommandLineFlags()
 	err := config.LoadConfiguration("config.yaml")
 	if err != nil {
 		log.Fatal(logformat.Logformat("ERROR", "00000000", fmt.Sprintf("Error while loading configuration: %v", err)))
