@@ -21,7 +21,7 @@ USE `reg-mail-service`;
 CREATE TABLE IF NOT EXISTS `templates` (
   `id` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT uuid(),
   `cid` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'common_id',
-  `lang` enum('en-US','en-GB','de-DE','de-CH','es-ES','fr-FR','it-IT','nl-NL','pl-PL','ru-RU') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
+  `lang` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
   `subject` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Enter E-Mail Subject',
   `data` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NULL',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
