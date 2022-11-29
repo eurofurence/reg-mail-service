@@ -20,7 +20,7 @@ USE `reg-mail-service`;
 -- Dumping structure for table reg-mail-service.templates
 CREATE TABLE IF NOT EXISTS `templates` (
   `id` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT uuid(),
-  `cid` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'common_id',
+  `cid` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'common_id',
   `lang` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
   `subject` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Enter E-Mail Subject',
   `data` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NULL',
@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS `templates` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX template ON templates(cid,lang);
 
 -- Dumping data for table reg-mail-service.templates: ~38 rows (approximately)
 /*!40000 ALTER TABLE `templates` DISABLE KEYS */;

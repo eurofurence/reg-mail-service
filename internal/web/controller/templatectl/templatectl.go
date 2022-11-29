@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
-	"github.com/eurofurence/reg-mail-service/api/v1/template"
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
+	"github.com/eurofurence/reg-mail-service/internal/api/v1/template"
+	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
-	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
-	"github.com/eurofurence/reg-mail-service/web/util/media"
+	"github.com/eurofurence/reg-mail-service/internal/web/filter"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
 	"net/http"
@@ -23,11 +24,11 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Get("/api/v1/templates", getTemplates)
-	server.Post("/api/v1/templates", createTemplate)
-	server.Get("/api/v1/templates/{uuid}", getTemplate)
-	server.Put("/api/v1/templates/{uuid}", updateTemplate)
-	server.Delete("/api/v1/templates/{uuid}", deleteTemplate)
+	server.Get("/api/v1/templates", filter.HasRoleOrApiToken(config.OidcAdminRole(), getTemplates))
+	server.Post("/api/v1/templates", filter.HasRoleOrApiToken(config.OidcAdminRole(), createTemplate))
+	server.Get("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), getTemplate))
+	server.Put("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), updateTemplate))
+	server.Delete("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), deleteTemplate))
 }
 
 func getTemplates(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +55,7 @@ func getTemplates(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
-	w.WriteHeader(http.StatusOK)
-	writeJson(r.Context(), w, result)
+	ctlutil.WriteJson(r.Context(), w, result)
 }
 
 func createTemplate(w http.ResponseWriter, r *http.Request) {
@@ -93,8 +93,7 @@ func getTemplate(w http.ResponseWriter, r *http.Request) {
 	mapTemplateToDto(temp, &dto)
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
-	w.WriteHeader(http.StatusOK)
-	writeJson(r.Context(), w, dto)
+	ctlutil.WriteJson(r.Context(), w, dto)
 }
 
 // Update Template by UUID
@@ -145,15 +144,6 @@ func deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
-	encoder := json.NewEncoder(w)
-	encoder.SetEscapeHTML(false)
-	err := encoder.Encode(v)
-	if err != nil {
-		logging.Ctx(ctx).Warn(fmt.Sprintf("error while encoding json response: %v", err))
-	}
 }
 
 func parseBodyToTemplateDto(ctx context.Context, w http.ResponseWriter, r *http.Request) (*template.TemplateDto, error) {

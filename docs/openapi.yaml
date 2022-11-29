@@ -144,7 +144,7 @@ paths:
           description: the locale, optional, leave blank to list all locales
           schema:
             type: string
-            example: de_DE
+            example: de-DE
       responses:
         '200':
           description: CID & Language match
@@ -419,7 +419,6 @@ components:
           example: example_cid
         lang:
           type: string
-          enum: [en-US, de-DE]
           example: en-US
           description: if a language version is not available, a configurable default is used
         subject:
@@ -428,7 +427,7 @@ components:
           description: the email subject
         data:
           type: string
-          example: 'Long Template Content with Variables in golang text/template style {{ .nickname }}'
+          example: 'Long Template Content with Variables in golang text/template style {{ nickname }}'
         created_at:
           type: string
           format: date-time

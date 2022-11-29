@@ -3,9 +3,9 @@ package middleware
 import (
 	"crypto/rsa"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
-	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
-	"github.com/eurofurence/reg-mail-service/web/util/ctxvalues"
-	"github.com/eurofurence/reg-mail-service/web/util/media"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctxvalues"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
 	"github.com/go-http-utils/headers"
 	"github.com/golang-jwt/jwt/v4"
 	"net/http"

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	aulogging "github.com/StephanHCB/go-autumn-logging"
-	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
 	"net/http"
 	"net/url"
 	"runtime/debug"

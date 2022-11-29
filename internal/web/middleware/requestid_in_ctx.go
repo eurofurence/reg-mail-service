@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/eurofurence/reg-mail-service/web/util/ctxvalues"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctxvalues"
 	"github.com/google/uuid"
 	"net/http"
 )

@@ -4,20 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
-	"github.com/eurofurence/reg-mail-service/api/v1/mail"
-	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/api/v1/health"
+	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
+	"github.com/eurofurence/reg-mail-service/internal/web/filter"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
 	"net/http"
 	"net/smtp"
 	"net/url"
 	"strings"
 
-	"github.com/eurofurence/reg-mail-service/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
-	"github.com/eurofurence/reg-mail-service/web/util/media"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
 )
@@ -29,7 +29,7 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Post("/api/v1/mail", sendMail)
+	server.Post("/api/v1/mail", filter.HasRoleOrApiToken(config.OidcAdminRole(), sendMail))
 
 	server.Get("/api/v1/mail/check", checkHealth)
 }
@@ -41,7 +41,7 @@ func checkHealth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
 	w.WriteHeader(http.StatusOK)
-	writeJson(r.Context(), w, dto)
+	ctlutil.WriteJson(r.Context(), w, dto)
 }
 
 func sendMail(w http.ResponseWriter, r *http.Request) {
@@ -112,15 +112,6 @@ func parseBodyToMailSendDto(ctx context.Context, w http.ResponseWriter, r *http.
 		mailParseErrorHandler(ctx, w, r, err)
 	}
 	return dto, err
-}
-
-func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
-	encoder := json.NewEncoder(w)
-	encoder.SetEscapeHTML(false)
-	err := encoder.Encode(v)
-	if err != nil {
-		logging.Ctx(ctx).Warn(fmt.Sprintf("error while encoding json response: %v", err))
-	}
 }
 
 // --- error handlers ---

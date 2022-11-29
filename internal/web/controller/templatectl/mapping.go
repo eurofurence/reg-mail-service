@@ -1,7 +1,7 @@
 package templatectl
 
 import (
-	dto "github.com/eurofurence/reg-mail-service/api/v1/template"
+	dto "github.com/eurofurence/reg-mail-service/internal/api/v1/template"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 )
 
