@@ -6,16 +6,14 @@ import (
 	"fmt"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/api/v1/template"
-	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
-	"net/http"
-	"net/url"
-	"strconv"
-
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
+	"github.com/eurofurence/reg-mail-service/web/util/ctlutil"
 	"github.com/eurofurence/reg-mail-service/web/util/media"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
+	"net/http"
+	"net/url"
 )
 
 var templateService templatesrv.TemplateService
@@ -132,21 +130,17 @@ func updateTemplate(w http.ResponseWriter, r *http.Request) {
 func deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto, err := parseBodyToTemplateDto(ctx, w, r)
-	if err != nil {
-		templateParseErrorHandler(r.Context(), w, r, err)
-		return
-	}
+	uuid := chi.URLParam(r, "uuid")
 
-	permanent, err := strconv.ParseBool(r.Header.Get("permanent"))
-	if err != nil {
-		templateParseErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	err = templateService.DeleteTemplate(r.Context(), dto.UUID, permanent)
+	_, err := templateService.GetTemplate(r.Context(), uuid)
 	if err != nil {
 		templateNotFoundErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	err = templateService.DeleteTemplate(r.Context(), uuid)
+	if err != nil {
+		templateDatabaseError(ctx, w, r, err)
 		return
 	}
 

@@ -11,7 +11,7 @@ type TemplateService interface {
 
 	CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) (string, error)
 	UpdateTemplate(ctx context.Context, uuid string, data *entity.Template) error
-	DeleteTemplate(ctx context.Context, uuid string, permanent bool) error
+	DeleteTemplate(ctx context.Context, uuid string) error
 	GetTemplate(ctx context.Context, id string) (*entity.Template, error)
 	GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 }
