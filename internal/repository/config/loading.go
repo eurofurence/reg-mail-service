@@ -4,14 +4,13 @@ import (
 	"crypto/rsa"
 	"errors"
 	"flag"
-	"fmt"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
-	"log"
+	"github.com/eurofurence/reg-mail-service/internal/repository/system"
+	"net/url"
 	"os"
 	"sort"
 	"sync"
 
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging/consolelogging/logformat"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,7 +30,7 @@ var (
 )
 
 func init() {
-	configurationData = &conf{}
+	configurationData = &conf{Logging: loggingConfig{Severity: "DEBUG"}}
 	configurationLock = &sync.RWMutex{}
 
 	flag.StringVar(&configurationFilename, "config", "config.yaml", "config file path")
@@ -44,7 +43,24 @@ func ParseCommandLineFlags() {
 	flag.Parse()
 }
 
-func logValidationErrors(errs validationErrors) error {
+func parseAndOverwriteConfig(yamlFile []byte) error {
+	newConfigurationData := &conf{}
+	err := yaml.UnmarshalStrict(yamlFile, newConfigurationData)
+	if err != nil {
+		// cannot use logging package here as this would create a circular dependency (logging needs config)
+		aulogging.Logger.NoCtx().Error().Printf("failed to parse configuration file '%s': %v", configurationFilename, err)
+		return err
+	}
+
+	setConfigurationDefaults(newConfigurationData)
+
+	errs := url.Values{}
+	validateServerConfiguration(errs, newConfigurationData.Server)
+	validateLoggingConfiguration(errs, newConfigurationData.Logging)
+	validateMailConfiguration(errs, newConfigurationData.Mail)
+	validateSecurityConfiguration(errs, newConfigurationData.Security)
+	validateDatabaseConfiguration(errs, newConfigurationData.Database)
+
 	if len(errs) != 0 {
 		var keys []string
 		for key := range errs {
@@ -55,46 +71,13 @@ func logValidationErrors(errs validationErrors) error {
 		for _, k := range keys {
 			key := k
 			val := errs[k]
-			for _, errorvalue := range val {
-				// cannot use logging package here as this would create a circular dependency (logging needs config)
-				log.Print(logformat.Logformat("ERROR", "00000000", fmt.Sprintf("configuration error: %s: %v", key, errorvalue)))
-			}
+			aulogging.Logger.NoCtx().Error().Printf("configuration error: %s: %s", key, val[0])
 		}
-		return errors.New("configuration validation error, see log output for details")
+		return errors.New("configuration validation error")
 	}
 
-	return nil
-}
-
-func configuration() *conf {
-	return configurationData
-}
-
-func validateConfiguration(newConfigurationData *conf) error {
-	errs := validationErrors{}
-
-	validateServerConfiguration(errs, newConfigurationData.Server)
-	//validateLoggingConfiguration(errs, newConfigurationData.Logging)
-	validateMailConfiguration(errs, newConfigurationData.Mail)
-	validateSecurityConfiguration(errs, newConfigurationData.Security)
-	//validateDatabaseConfiguration(errs, newConfigurationData.Database)
-
-	return logValidationErrors(errs)
-}
-
-func parseAndOverwriteConfig(yamlFile []byte) error {
-	newConfigurationData := &conf{}
-	err := yaml.UnmarshalStrict(yamlFile, newConfigurationData)
-	if err != nil {
-		return err
-	}
-
-	setConfigurationDefaults(newConfigurationData)
-
-	err = validateConfiguration(newConfigurationData)
-	if err != nil {
-		return err
-	}
+	configurationLock.Lock()
+	defer configurationLock.Unlock()
 
 	configurationData = newConfigurationData
 	return nil
@@ -109,6 +92,19 @@ func loadConfiguration() error {
 	}
 	err = parseAndOverwriteConfig(yamlFile)
 	return err
+}
+
+// LoadTestingConfigurationFromPathOrAbort is for tests to set a hardcoded yaml configuration
+func LoadTestingConfigurationFromPathOrAbort(configFilenameForTests string) {
+	configurationFilename = configFilenameForTests
+	if err := StartupLoadConfiguration(); err != nil {
+		system.Exit(1)
+	}
+}
+
+// EnableTestingMigrateDatabase is for tests
+func EnableTestingMigrateDatabase() {
+	dbMigrate = true
 }
 
 func StartupLoadConfiguration() error {

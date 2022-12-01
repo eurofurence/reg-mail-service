@@ -2,6 +2,7 @@ package config
 
 import (
 	"crypto/rsa"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -11,7 +12,8 @@ func UseEcsLogging() bool {
 }
 
 func ServerAddr() string {
-	return ":" + configuration().Server.Port
+	c := Configuration()
+	return fmt.Sprintf("%s:%s", c.Server.Address, c.Server.Port)
 }
 
 func ServerReadTimeout() time.Duration {
@@ -78,7 +80,7 @@ func OidcAdminRole() string {
 }
 
 func IsCorsDisabled() bool {
-	return configuration().Security.DisableCors
+	return Configuration().Security.DisableCors
 }
 
 func CorsAllowOrigin() string {
