@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/StephanHCB/go-autumn-logging v0.3.0
 	github.com/StephanHCB/go-autumn-logging-zerolog v0.3.1
-	github.com/eurofurence/reg-attendee-service v0.0.0-20221129171405-797267c5d4fd
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/golang-jwt/jwt/v4 v4.4.3

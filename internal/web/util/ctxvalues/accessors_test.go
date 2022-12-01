@@ -2,7 +2,7 @@ package ctxvalues
 
 import (
 	"context"
-	"github.com/eurofurence/reg-attendee-service/docs"
+	"github.com/eurofurence/reg-mail-service/docs"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
