@@ -3,7 +3,6 @@ package mailctl
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
@@ -54,8 +53,9 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(dto.To) == 0 {
-		mailParseErrorHandler(r.Context(), w, r, errors.New("recipient 'to' cannot be empty"))
+	validationErrs := validate(ctx, dto)
+	if len(validationErrs) != 0 {
+		mailValidationErrorHandler(ctx, w, r, validationErrs)
 		return
 	}
 
@@ -83,7 +83,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	tempResult := template.Data
 
 	for k, v := range dto.Variables {
-		tempResult = strings.ReplaceAll(tempResult, "{{ ."+k+" }}", v)
+		tempResult = strings.ReplaceAll(tempResult, "{{ "+k+" }}", v)
 	}
 
 	body := []byte("To: " + strings.Join(dto.To, ";") + "\r\n" +
@@ -115,6 +115,11 @@ func parseBodyToMailSendDto(ctx context.Context, w http.ResponseWriter, r *http.
 }
 
 // --- error handlers ---
+
+func mailValidationErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, errs url.Values) {
+	aulogging.Logger.Ctx(ctx).Warn().Printf("received mail data with validation errors: %v", errs)
+	ctlutil.ErrorHandler(ctx, w, r, "mail.data.invalid", http.StatusBadRequest, errs)
+}
 
 func mailServerErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mail could not be sent: %s", err.Error())
