@@ -3,6 +3,7 @@ package mysqldb
 import (
 	"context"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
+	"gorm.io/gorm/schema"
 	"time"
 
 	"github.com/eurofurence/reg-mail-service/internal/entity"
@@ -22,7 +23,11 @@ func Create() dbrepo.Repository {
 }
 
 func (r *MysqlRepository) Open() error {
-	gormConfig := gorm.Config{}
+	gormConfig := gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix: "mail_",
+		},
+	}
 	connectString := config.DatabaseMysqlConnectString()
 
 	db, err := gorm.Open(mysql.Open(connectString), &gormConfig)

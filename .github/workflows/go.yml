@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        path: ./reg-attendee-service
+        path: ./reg-mail-service
 
     - name: Set up Go
       uses: actions/setup-go@v2
@@ -26,8 +26,8 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-      working-directory: ./reg-attendee-service
+      working-directory: ./reg-mail-service
 
     - name: Test
       run: go test -v ./...
-      working-directory: ./reg-attendee-service
+      working-directory: ./reg-mail-service

@@ -9,14 +9,6 @@ import (
 	"net/url"
 )
 
-type MailSendDto struct {
-	CommonID string `json:"cid"`
-
-	Cc        []string          `json:"cc"`
-	Bcc       []string          `json:"bcc"`
-	Variables map[string]string `json:"variables"`
-}
-
 const emailPattern = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
 const langPattern = "^[a-z]{2}-[A-Z]{2}$"
 
