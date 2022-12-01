@@ -5,7 +5,7 @@
 
 ## Overview
 
-A backend service...
+Mail backend service.
 
 Implemented in go.
 
@@ -15,6 +15,10 @@ Command line arguments
 ## Installation
 
 This service uses go modules to provide dependency management, see `go.mod`.
+
+Copy config.example.yaml from the docs/ directory into the project root. Rename that file into:
+config.yaml
+Then configure all variables as needed.
 
 If you place this repository OUTSIDE of your gopath, `go build main.go` and `go test ./...` will download all
 required dependencies by default.

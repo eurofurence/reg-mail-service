@@ -1,4 +1,40 @@
 server:
   port: 8181
+logging:
+  severity: INFO
+mail:
+  from: 'no-reply@example.com' # Sender E-Mail Address
+  from-password: 'email-account-password' # Sender E-Mail Passwor
+  smtp-host: 'mail.example.com' # Mailserver Host
+  smtp-port: '587' # Mailserver Port
+database:
+  use: 'inmemory' # [inmemory, mysql]
+  mysql:
+    username: 'db-user-username'
+    password: 'db-user-password'
+    database: 'tcp(localhost:3306)/db-name'
+    parameters:
+      - 'charset=utf8mb4'
+      - 'collation=utf8mb4_general_ci'
+      - 'parseTime=True'
+      - 'timeout=30s' # connection timeout
 security:
+  fixed_token:
+    api: 'put_secure_random_string_here_for_api_token'
+  oidc:
+    # set this nonempty to also try to read the jwt token from a cookie
+    token_cookie_name: 'JWT'
+    # a list of public RSA keys in PEM format, see https://github.com/Jumpy-Squirrel/jwks2pem for obtaining PEM from openid keyset endpoint
+    token_public_keys_PEM:
+      - |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnzyis1ZjfNB0bBgKFMSv
+        vkTtwlvBsaJq7S5wA+kzeVOVpVWwkWdVha4s38XM/pa/yr47av7+z3VTmvDRyAHc
+        aT92whREFpLv9cj5lTeJSibyr/Mrm/YtjCZVWgaOYIhwrXwKLqPr/11inWsAkfIy
+        tvHWTxZYEcXLgAXFuUuaS3uF9gEiNQwzGTU1v0FqkqTBr4B8nW3HCN47XUu0t8Y0
+        e+lf4s4OxQawWD79J9/5d3Ry0vbV3Am1FtGJiJvOwRsIfVChDpYStTcHTCMqtvWb
+        V6L11BWkpzGXSW4Hv43qa+GSYOD2QU68Mb59oSk2OB+BtOLpJofmbGEGgvmwyCI9
+        MwIDAQAB
+        -----END PUBLIC KEY-----
+    admin_role: 'admin'
   disable_cors: false

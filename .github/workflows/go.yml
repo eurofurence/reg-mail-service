@@ -16,14 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        path: ./reg-mail-service
 
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.19
 
     - name: Build
       run: go build -v ./...
+      working-directory: ./reg-mail-service
 
     - name: Test
       run: go test -v ./...
+      working-directory: ./reg-mail-service
