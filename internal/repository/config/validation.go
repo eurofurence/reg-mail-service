@@ -9,6 +9,32 @@ import (
 	"strconv"
 )
 
+func setConfigurationDefaults(c *conf) {
+	if c.Server.Port == "" {
+		c.Server.Port = "8080"
+	}
+	if c.Server.ReadTimeout <= 0 {
+		c.Server.ReadTimeout = 5
+	}
+	if c.Server.WriteTimeout <= 0 {
+		c.Server.WriteTimeout = 5
+	}
+	if c.Server.IdleTimeout <= 0 {
+		c.Server.IdleTimeout = 5
+	}
+	if c.Logging.Severity == "" {
+		c.Logging.Severity = "INFO"
+	}
+	if c.Database.Use == "" {
+		c.Database.Use = "inmemory"
+	}
+	if c.Security.CorsAllowOrigin == "" {
+		c.Security.CorsAllowOrigin = "*"
+	}
+}
+
+const portPattern = "^[1-9][0-9]{0,4}$"
+
 func addError(errs validationErrors, key string, value interface{}, message string) {
 	errs[key] = append(errs[key], fmt.Sprintf("value '%v' %s", value, message))
 }

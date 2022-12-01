@@ -9,7 +9,11 @@ type conf struct {
 }
 
 type serverConfig struct {
-	Port string `yaml:"port"`
+	Address      string `yaml:"address"`
+	Port         string `yaml:"port"`
+	ReadTimeout  int    `yaml:"read_timeout_seconds"`
+	WriteTimeout int    `yaml:"write_timeout_seconds"`
+	IdleTimeout  int    `yaml:"idle_timeout_seconds"`
 }
 
 type loggingConfig struct {

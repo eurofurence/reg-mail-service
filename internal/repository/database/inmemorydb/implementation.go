@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )
 
@@ -17,12 +16,18 @@ func Create() dbrepo.Repository {
 	return &InmemoryRepository{}
 }
 
-func (r *InmemoryRepository) Open() {
+func (r *InmemoryRepository) Open() error {
 	r.internalStore = make(map[string]*entity.Template)
+	return nil
 }
 
 func (r *InmemoryRepository) Close() {
 	r.internalStore = nil
+}
+
+func (r *InmemoryRepository) Migrate() error {
+	// nothing to do
+	return nil
 }
 
 func (r *InmemoryRepository) GetTemplates(ctx context.Context) ([]*entity.Template, error) {
@@ -89,8 +94,8 @@ func (r *InmemoryRepository) GetTemplateById(ctx context.Context, id string) (*e
 	if !ok {
 		return &entity.Template{}, errors.New("template not found")
 	}
-	copy := *template
-	return &copy, nil
+	templateCopy := *template
+	return &templateCopy, nil
 }
 
 func (r *InmemoryRepository) GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error) {

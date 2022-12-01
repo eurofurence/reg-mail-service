@@ -11,7 +11,7 @@ import (
 type TemplateServiceImplData struct {
 }
 
-func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string, lang string, title string, data string) (string, error) {
+func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string, lang string, subject string, data string) (string, error) {
 	var a entity.Template
 
 	if lang == "" {
@@ -26,7 +26,7 @@ func (s *TemplateServiceImplData) CreateTemplate(ctx context.Context, cid string
 	a.ID = newId.String()
 	a.CommonID = cid
 	a.Language = lang
-	a.Subject = title
+	a.Subject = subject
 	a.Data = data
 
 	err = database.GetRepository().CreateTemplate(ctx, &a)

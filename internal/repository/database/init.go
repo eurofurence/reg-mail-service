@@ -1,6 +1,7 @@
 package database
 
 import (
+	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/inmemorydb"
@@ -12,7 +13,11 @@ var (
 	ActiveRepository dbrepo.Repository
 )
 
-func Open() {
+func SetRepository(repository dbrepo.Repository) {
+	ActiveRepository = repository
+}
+
+func Open() error {
 	var r dbrepo.Repository
 	if config.DatabaseUse() == "mysql" {
 		logging.NoCtx().Info("Opening mysql database...")
@@ -23,8 +28,9 @@ func Open() {
 		//r = historizeddb.Create(inmemorydb.Create())
 		r = inmemorydb.Create()
 	}
-	r.Open()
+	err := r.Open()
 	SetRepository(r)
+	return err
 }
 
 func Close() {
@@ -33,8 +39,14 @@ func Close() {
 	SetRepository(nil)
 }
 
-func SetRepository(repository dbrepo.Repository) {
-	ActiveRepository = repository
+func MigrateIfSwitchedOn() (err error) {
+	if config.MigrateDatabase() {
+		aulogging.Logger.NoCtx().Info().Print("Migrating database...")
+		err = GetRepository().Migrate()
+	} else {
+		aulogging.Logger.NoCtx().Info().Print("Not migrating database. Provide -migrate-database command line switch to enable.")
+	}
+	return
 }
 
 func GetRepository() dbrepo.Repository {

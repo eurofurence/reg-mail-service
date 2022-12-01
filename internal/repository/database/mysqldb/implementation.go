@@ -9,8 +9,8 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type MysqlRepository struct {
@@ -21,25 +21,45 @@ func Create() dbrepo.Repository {
 	return &MysqlRepository{}
 }
 
-func (r *MysqlRepository) Open() {
-	db, err := gorm.Open("mysql", config.DatabaseMysqlConnectString())
+func (r *MysqlRepository) Open() error {
+	gormConfig := gorm.Config{}
+	connectString := config.DatabaseMysqlConnectString()
+
+	db, err := gorm.Open(mysql.Open(connectString), &gormConfig)
 	if err != nil {
-		logging.NoCtx().Fatal("failed to open mysql connection: %v", err)
+		aulogging.Logger.NoCtx().Error().WithErr(err).Printf("failed to open mysql connection: %s", err.Error())
+		return err
+	}
+
+	sqlDb, err := db.DB()
+	if err != nil {
+		aulogging.Logger.NoCtx().Error().WithErr(err).Printf("failed to configure mysql connection: %s", err.Error())
+		return err
 	}
 
 	// see https://making.pusher.com/production-ready-connection-pooling-in-go/
-	db.DB().SetMaxOpenConns(100)
-	db.DB().SetMaxIdleConns(50)
-	db.DB().SetConnMaxLifetime(time.Minute * 10)
+	sqlDb.SetMaxOpenConns(100)
+	sqlDb.SetMaxIdleConns(50)
+	sqlDb.SetConnMaxLifetime(time.Minute * 10)
 
 	r.db = db
+	return nil
 }
 
 func (r *MysqlRepository) Close() {
-	err := r.db.Close()
+	// no more db close in gorm v2
+}
+
+func (r *MysqlRepository) Migrate() error {
+	err := r.db.AutoMigrate(
+		&entity.Template{},
+		&entity.History{},
+	)
 	if err != nil {
-		logging.NoCtx().Fatal("failed to close mysql connection: ", err)
+		aulogging.Logger.NoCtx().Error().WithErr(err).Printf("failed to migrate mysql db: %s", err.Error())
+		return err
 	}
+	return nil
 }
 
 func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template, error) {

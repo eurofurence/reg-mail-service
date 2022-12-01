@@ -3,10 +3,27 @@ package config
 import (
 	"crypto/rsa"
 	"strings"
+	"time"
 )
+
+func UseEcsLogging() bool {
+	return ecsLogging
+}
 
 func ServerAddr() string {
 	return ":" + configuration().Server.Port
+}
+
+func ServerReadTimeout() time.Duration {
+	return time.Second * time.Duration(Configuration().Server.ReadTimeout)
+}
+
+func ServerWriteTimeout() time.Duration {
+	return time.Second * time.Duration(Configuration().Server.WriteTimeout)
+}
+
+func ServerIdleTimeout() time.Duration {
+	return time.Second * time.Duration(Configuration().Server.IdleTimeout)
 }
 
 func EmailFrom() string {
@@ -33,6 +50,10 @@ func DatabaseMysqlConnectString() string {
 	c := Configuration().Database.Mysql
 	return c.Username + ":" + c.Password + "@" +
 		c.Database + "?" + strings.Join(c.Parameters, "&")
+}
+
+func MigrateDatabase() bool {
+	return dbMigrate
 }
 
 func LoggingSeverity() string {
@@ -62,8 +83,4 @@ func IsCorsDisabled() bool {
 
 func CorsAllowOrigin() string {
 	return Configuration().Security.CorsAllowOrigin
-}
-
-func UseEcsLogging() bool {
-	return ecsLogging
 }

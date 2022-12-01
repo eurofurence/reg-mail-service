@@ -7,9 +7,9 @@ import (
 )
 
 type Repository interface {
-	Open()
+	Open() error
 	Close()
-	//Migrate()
+	Migrate() error
 
 	GetTemplates(ctx context.Context) ([]*entity.Template, error)
 
