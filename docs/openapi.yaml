@@ -20,8 +20,9 @@ servers:
       port:
         description: The port all API requests listen on.
         enum:
+          - '9093'
           - '8181'
-        default: '8181'
+        default: '9093'
 tags:
   - name: mails
     description: Mail Service
@@ -385,11 +386,13 @@ components:
             A keyed description of the error. We do not write human readable text here because the user interface will be multi language.
             
             At this time, there are these values:
+            - mail.data.invalid (given data is not plausible)
             - mail.server.error (mail server failure while sending email)
+            - mail.parse.error (json body parse error)
+            - template.invalid.error (given data is not plausible)
+            - template.database.error (problem with database)
+            - template.notfound.error (template does not exist in database)
             - template.parse.error (json body parse error)
-            - template.database.error
-            - template.notfound.error
-            - template.invalid.error
           example: mail.server.error
         details:
           type: array

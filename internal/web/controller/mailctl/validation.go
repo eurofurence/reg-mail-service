@@ -17,7 +17,7 @@ func validate(ctx context.Context, a *mail.MailSendDto) url.Values {
 
 	validation.CheckLength(&errs, 1, 5, "lang", a.Lang)
 	if validation.ViolatesPattern(langPattern, a.Lang) {
-		errs.Add("lang", "language field is not plausible, must match "+emailPattern)
+		errs.Add("lang", "language field is not plausible, must match "+langPattern+" (e.g.: de-DE)")
 	}
 
 	if len(a.To) > 0 {
