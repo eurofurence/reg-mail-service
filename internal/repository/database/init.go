@@ -6,7 +6,6 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/inmemorydb"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/mysqldb"
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 )
 
 var (
@@ -20,11 +19,11 @@ func SetRepository(repository dbrepo.Repository) {
 func Open() error {
 	var r dbrepo.Repository
 	if config.DatabaseUse() == "mysql" {
-		logging.NoCtx().Info("Opening mysql database...")
+		aulogging.Logger.NoCtx().Info().Print("Opening mysql database...")
 		//r = historizeddb.Create(mysqldb.Create())
 		r = mysqldb.Create()
 	} else {
-		logging.NoCtx().Info("Opening inmemory database...")
+		aulogging.Logger.NoCtx().Info().Print("Opening inmemory database...")
 		//r = historizeddb.Create(inmemorydb.Create())
 		r = inmemorydb.Create()
 	}
@@ -34,7 +33,7 @@ func Open() error {
 }
 
 func Close() {
-	logging.NoCtx().Info("Closing database...")
+	aulogging.Logger.NoCtx().Info().Print("Closing database...")
 	GetRepository().Close()
 	SetRepository(nil)
 }
@@ -51,7 +50,7 @@ func MigrateIfSwitchedOn() (err error) {
 
 func GetRepository() dbrepo.Repository {
 	if ActiveRepository == nil {
-		logging.NoCtx().Fatal("You must Open() the database before using it. This is an error in your implementation.")
+		aulogging.Logger.NoCtx().Fatal().Print("You must Open() the database before using it. This is an error in your implementation.")
 	}
 	return ActiveRepository
 }

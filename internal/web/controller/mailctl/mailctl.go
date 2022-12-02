@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
@@ -34,8 +33,6 @@ func Create(server chi.Router) {
 }
 
 func checkHealth(w http.ResponseWriter, r *http.Request) {
-	logging.Ctx(r.Context()).Info("mail health")
-
 	dto := health.HealthResultDto{Status: "up"}
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
@@ -99,7 +96,8 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 		mailServerErrorHandler(r.Context(), w, r, err)
 		return
 	}
-	logging.Ctx(r.Context()).Info("Mail with template (", dto.CommonID, "/", dto.Lang, ") sent. TO: ", dto.To, ". CC: ", dto.Cc, ". BCC: ", dto.Bcc)
+	aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail with template (%s/%s) sent. TO: %s. CC: %s. BCC: %s",
+		dto.CommonID, dto.Lang, dto.To, dto.Cc, dto.Bcc)
 
 	w.WriteHeader(http.StatusOK)
 }

@@ -44,12 +44,12 @@ func SmtpPort() string {
 	return configurationData.Mail.Port
 }
 
-func DatabaseUse() string {
+func DatabaseUse() DatabaseType {
 	return Configuration().Database.Use
 }
 
 func DatabaseMysqlConnectString() string {
-	c := Configuration().Database.Mysql
+	c := Configuration().Database
 	return c.Username + ":" + c.Password + "@" +
 		c.Database + "?" + strings.Join(c.Parameters, "&")
 }
@@ -71,7 +71,6 @@ func OidcTokenCookieName() string {
 }
 
 func OidcKeySet() []*rsa.PublicKey {
-	// TODO implement parsing during validation
 	return parsedKeySet
 }
 
@@ -80,9 +79,9 @@ func OidcAdminRole() string {
 }
 
 func IsCorsDisabled() bool {
-	return Configuration().Security.DisableCors
+	return Configuration().Security.Cors.DisableCors
 }
 
 func CorsAllowOrigin() string {
-	return Configuration().Security.CorsAllowOrigin
+	return Configuration().Security.Cors.AllowOrigin
 }

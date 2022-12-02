@@ -1,23 +1,20 @@
 server:
-  port: 8181
-logging:
-  severity: INFO
+  port: 9093
 mail:
   from: 'no-reply@example.com' # Sender E-Mail Address
-  from-password: 'email-account-password' # Sender E-Mail Passwor
-  smtp-host: 'mail.example.com' # Mailserver Host
-  smtp-port: '587' # Mailserver Port
+  from_password: 'email-account-password' # Sender E-Mail Passwor
+  smtp_host: 'mail.example.com' # Mailserver Host
+  smtp_port: '587' # Mailserver Port
 database:
   use: 'inmemory' # [inmemory, mysql]
-  mysql:
-    username: 'db-user-username'
-    password: 'db-user-password'
-    database: 'tcp(localhost:3306)/db-name'
-    parameters:
-      - 'charset=utf8mb4'
-      - 'collation=utf8mb4_general_ci'
-      - 'parseTime=True'
-      - 'timeout=30s' # connection timeout
+  username: 'db-user-username'
+  password: 'db-user-password'
+  database: 'tcp(localhost:3306)/db-name'
+  parameters:
+    - 'charset=utf8mb4'
+    - 'collation=utf8mb4_general_ci'
+    - 'parseTime=True'
+    - 'timeout=30s' # connection timeout
 security:
   fixed_token:
     api: 'put_secure_random_string_here_for_api_token'
@@ -37,4 +34,11 @@ security:
         MwIDAQAB
         -----END PUBLIC KEY-----
     admin_role: 'admin'
-  disable_cors: false
+  cors:
+    # set this to true to send disable cors headers - not for production - local/test instances only - will log lots of warnings
+    disable: false
+    # if setting disable_cors, you should also specify this, as a comma separated list of allowed origins
+    allow_origin: 'http://localhost:8000,http://localhost:8001'
+logging:
+  severity: INFO
+  style: plain # or ecs (elastic common schema), the default

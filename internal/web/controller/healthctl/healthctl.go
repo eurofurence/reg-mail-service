@@ -3,12 +3,11 @@ package healthctl
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
 	"net/http"
 
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
 )
@@ -18,8 +17,6 @@ func Create(server chi.Router) {
 }
 
 func healthGet(w http.ResponseWriter, r *http.Request) {
-	logging.Ctx(r.Context()).Info("health")
-
 	dto := health.HealthResultDto{Status: "up"}
 
 	w.Header().Add(headers.ContentType, media.ContentTypeApplicationJson)
@@ -32,6 +29,6 @@ func writeJson(ctx context.Context, w http.ResponseWriter, v interface{}) {
 	encoder.SetEscapeHTML(false)
 	err := encoder.Encode(v)
 	if err != nil {
-		logging.Ctx(ctx).Warn(fmt.Sprintf("error while encoding json response: %v", err))
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("error while encoding json response: %s", err.Error())
 	}
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"gorm.io/gorm/schema"
+	"net/url"
 	"time"
 
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
-	"github.com/eurofurence/reg-mail-service/internal/repository/logging"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -73,7 +73,7 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template,
 
 	rows, err := r.db.Order("id").Find(&buffer).Rows()
 	if err != nil {
-		aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("mysql error during selection of templates:  %s", err.Error())
+		aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("mysql error during selection of templates: %s", err.Error())
 		return result, err
 	}
 	defer func() {
@@ -99,7 +99,7 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template,
 func (r *MysqlRepository) CreateTemplate(ctx context.Context, tpl *entity.Template) error {
 	err := r.db.Create(&tpl).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template creation: ", err)
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error during template creation: %s", err.Error())
 	}
 	return err
 }
@@ -120,7 +120,7 @@ func (r *MysqlRepository) DeleteTemplate(ctx context.Context, uuid string, perma
 	}
 
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template deletion: ", err)
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error during template deletion: %s", err.Error())
 	}
 	return err
 }
@@ -130,7 +130,7 @@ func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data 
 
 	temp, err := r.GetTemplateById(ctx, uuid)
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template update: ", err)
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error during template update: %s", err.Error())
 		return err
 	}
 
@@ -141,7 +141,7 @@ func (r *MysqlRepository) UpdateTemplate(ctx context.Context, uuid string, data 
 
 	err = r.db.Save(temp).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template update: ", err)
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error during template update: %s", err.Error())
 	}
 	return err
 }
@@ -150,7 +150,7 @@ func (r *MysqlRepository) GetTemplateById(ctx context.Context, id string) (*enti
 	var a entity.Template
 	err := r.db.First(&a, "id = ?", id).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template select: ", err)
+		aulogging.Logger.Ctx(ctx).Info().WithErr(err).Printf("mysql error during template select by id '%s': %s", url.QueryEscape(id), err.Error())
 	}
 	return &a, err
 }
@@ -159,11 +159,11 @@ func (r *MysqlRepository) GetTemplateByCid(ctx context.Context, cid string, lang
 	var a entity.Template
 	err := r.db.First(&a, "cid = ? AND lang = ?", cid, lang).Error
 	if err != nil {
-		logging.Ctx(ctx).Info("mysql error during template select [", cid, "/", lang, "]: ", err, ". Trying en-US fallback...")
+		aulogging.Logger.Ctx(ctx).Info().WithErr(err).Printf("mysql error during template select [%s/%s]: %s. Trying en-US fallback...", url.QueryEscape(cid), url.QueryEscape(lang), err.Error())
 
 		err := r.db.First(&a, "cid = ? AND lang = ?", cid, "en-US").Error
 		if err != nil {
-			logging.Ctx(ctx).Info("mysql error during template select: ", err)
+			aulogging.Logger.Ctx(ctx).Info().WithErr(err).Printf("mysql error during template select: %s", err.Error())
 		}
 		return &a, err
 	}
