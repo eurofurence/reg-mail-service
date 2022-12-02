@@ -55,7 +55,7 @@ server:
 logging:
   severity: FELINE
 mail:
-  smtp-port: xyz
+  smtp_port: xyz
 database:
   use: the-oracle-of-delphi
 `
@@ -84,9 +84,9 @@ func TestParseAndOverwriteDefaults(t *testing.T) {
 	minimalYaml := `# yaml with minimal settings
 mail:
   from: 'no-reply@example.com'
-  from-password: 'email-account-password'
-  smtp-host: 'mail.example.com'
-  smtp-port: '587'
+  from_password: 'email-account-password'
+  smtp_host: 'mail.example.com'
+  smtp_port: '587'
 security:
   fixed_token:
     api: 'fixed-testing-token-abc'
@@ -97,5 +97,5 @@ security:
 	require.Nil(t, err, "expected no error")
 	require.Equal(t, "8080", Configuration().Server.Port, "unexpected value for server.port")
 	require.Equal(t, "INFO", Configuration().Logging.Severity, "unexpected value for logging.severity")
-	require.Equal(t, "inmemory", Configuration().Database.Use, "unexpected value for database.use")
+	require.Equal(t, Inmemory, Configuration().Database.Use, "unexpected value for database.use")
 }

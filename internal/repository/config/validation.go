@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func setConfigurationDefaults(c *conf) {
+func setConfigurationDefaults(c *Application) {
 	if c.Server.Port == "" {
 		c.Server.Port = "8080"
 	}
@@ -28,14 +28,14 @@ func setConfigurationDefaults(c *conf) {
 	if c.Database.Use == "" {
 		c.Database.Use = "inmemory"
 	}
-	if c.Security.CorsAllowOrigin == "" {
-		c.Security.CorsAllowOrigin = "*"
+	if c.Security.Cors.AllowOrigin == "" {
+		c.Security.Cors.AllowOrigin = "*"
 	}
 }
 
 const portPattern = "^[1-9][0-9]{0,4}$"
 
-func validateServerConfiguration(errs url.Values, c serverConfig) {
+func validateServerConfiguration(errs url.Values, c ServerConfig) {
 	if validation.ViolatesPattern(portPattern, c.Port) {
 		errs.Add("server.port", "must be a number between 1 and 65535")
 	}
@@ -46,13 +46,13 @@ func validateServerConfiguration(errs url.Values, c serverConfig) {
 
 var allowedSeverities = []string{"DEBUG", "INFO", "WARN", "ERROR"}
 
-func validateLoggingConfiguration(errs url.Values, c loggingConfig) {
+func validateLoggingConfiguration(errs url.Values, c LoggingConfig) {
 	if validation.NotInAllowedValues(allowedSeverities[:], c.Severity) {
 		errs.Add("logging.severity", "must be one of DEBUG, INFO, WARN, ERROR")
 	}
 }
 
-func validateMailConfiguration(errs url.Values, m mailConfig) {
+func validateMailConfiguration(errs url.Values, m MailConfig) {
 	re := regexp.MustCompile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
 	if m.From == "" {
@@ -65,28 +65,28 @@ func validateMailConfiguration(errs url.Values, m mailConfig) {
 	}
 
 	if m.Host == "" {
-		errs.Add("mail.smtp-host", m.Host+" cannot be empty")
+		errs.Add("mail.smtp_host", m.Host+" cannot be empty")
 	}
 
 	if m.Port == "" {
-		errs.Add("mail.smtp-port", m.Port+" cannot be empty")
+		errs.Add("mail.smtp_port", m.Port+" cannot be empty")
 	}
 }
 
-var allowedDatabases = []string{"mysql", "inmemory"}
+var allowedDatabases = []DatabaseType{Mysql, Inmemory}
 
-func validateDatabaseConfiguration(errs url.Values, c databaseConfig) {
+func validateDatabaseConfiguration(errs url.Values, c DatabaseConfig) {
 	if validation.NotInAllowedValues(allowedDatabases[:], c.Use) {
 		errs.Add("database.use", "must be one of mysql, inmemory")
 	}
-	if c.Use == "mysql" {
-		validation.CheckLength(&errs, 1, 256, "database.mysql.username", c.Mysql.Username)
-		validation.CheckLength(&errs, 1, 256, "database.mysql.password", c.Mysql.Password)
-		validation.CheckLength(&errs, 1, 256, "database.mysql.database", c.Mysql.Database)
+	if c.Use == Mysql {
+		validation.CheckLength(&errs, 1, 256, "database.username", c.Username)
+		validation.CheckLength(&errs, 1, 256, "database.password", c.Password)
+		validation.CheckLength(&errs, 1, 256, "database.database", c.Database)
 	}
 }
 
-func validateSecurityConfiguration(errs url.Values, c securityConfig) {
+func validateSecurityConfiguration(errs url.Values, c SecurityConfig) {
 	validation.CheckLength(&errs, 16, 256, "security.fixed.api", c.Fixed.Api)
 	validation.CheckLength(&errs, 1, 256, "security.oidc.admin_role", c.Oidc.AdminRole)
 
