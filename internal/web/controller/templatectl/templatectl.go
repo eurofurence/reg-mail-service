@@ -67,6 +67,12 @@ func createTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	validationErrs := validate(ctx, dto)
+	if len(validationErrs) != 0 {
+		templateValidationErrorHandler(ctx, w, r, validationErrs)
+		return
+	}
+
 	uuid, err := templateService.CreateTemplate(r.Context(), dto.CommonID, dto.Lang, dto.Subject, dto.Data)
 	if err != nil {
 		templateParseErrorHandler(ctx, w, r, err)
@@ -114,6 +120,12 @@ func updateTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	validationErrs := validate(ctx, dto)
+	if len(validationErrs) != 0 {
+		templateValidationErrorHandler(ctx, w, r, validationErrs)
+		return
+	}
+
 	mapDtoToTemplate(dto, tpl)
 
 	err = templateService.UpdateTemplate(r.Context(), uuid, tpl)
@@ -158,6 +170,11 @@ func parseBodyToTemplateDto(ctx context.Context, w http.ResponseWriter, r *http.
 
 // --- error handlers ---
 
+func templateValidationErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, errs url.Values) {
+	aulogging.Logger.Ctx(ctx).Warn().Printf("received mail data with validation errors: %v", errs)
+	ctlutil.ErrorHandler(ctx, w, r, "template.invalid.error", http.StatusBadRequest, errs)
+}
+
 func templateDatabaseError(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template database error: %s", err.Error())
 	ctlutil.ErrorHandler(ctx, w, r, "template.database.error", http.StatusBadGateway, url.Values{"error": {err.Error()}})
@@ -171,9 +188,4 @@ func templateNotFoundErrorHandler(ctx context.Context, w http.ResponseWriter, r 
 func templateParseErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template body could not be parsed: %s", err.Error())
 	ctlutil.ErrorHandler(ctx, w, r, "template.parse.error", http.StatusBadRequest, url.Values{"error": {err.Error()}})
-}
-
-func templateInvalidErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
-	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("template body invalid: %s", err.Error())
-	ctlutil.ErrorHandler(ctx, w, r, "template.invalid.error", http.StatusBadRequest, url.Values{"error": {err.Error()}})
 }
