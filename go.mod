@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/StephanHCB/go-autumn-logging v0.3.0
 	github.com/StephanHCB/go-autumn-logging-zerolog v0.3.1
-	github.com/go-chi/chi/v5 v5.0.7
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/google/uuid v1.3.0
