@@ -73,9 +73,6 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	smtpHost := config.SmtpHost()
 	smtpPort := config.SmtpPort()
 
-	// Authentication
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
 	// Prepare E-Mail Content
 	tempResult := template.Data
 
@@ -83,21 +80,51 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 		tempResult = strings.ReplaceAll(tempResult, "{{ "+k+" }}", v)
 	}
 
-	body := []byte("To: " + strings.Join(dto.To, ";") + "\r\n" +
-		"Cc: " + strings.Join(dto.Cc, ";") + "\r\n" +
-		"Bcc: " + strings.Join(dto.Bcc, ";") + "\r\n" +
-		"Subject: " + template.Subject + "\r\n" +
-		"\r\n" +
-		tempResult + "\r\n")
+	/// Start of the E-Mail Body
+	// Override the recipients to the pre-set developer mails in the config, if development mode is active
+	body := []byte("")
+	if config.MailDevMode() {
+		body = []byte("To: " + strings.Join(config.MailDevMails(), ";") + "\r\n")
+	} else {
+		body = []byte("To: " + strings.Join(dto.To, ";") + "\r\n")
+	}
+
+	// Add Blind CC if any available (and not in Development Mode)
+	if len(dto.Cc) > 0 && !config.MailDevMode() {
+		body = append(body, []byte("Cc: "+strings.Join(dto.Cc, ";")+"\r\n")...)
+	}
+
+	// Add Blind CC if any available (and not in Development Mode)
+	if len(dto.Bcc) > 0 && !config.MailDevMode() {
+		body = append(body, []byte("Bcc: "+strings.Join(dto.Bcc, ";")+"\r\n")...)
+	}
+
+	// Title and Content of E-Mail
+	// Add Development Mode content if Mail Development Mode is active in config
+	body = append(body, []byte("Subject: "+template.Subject+"\r\n"+"\r\n"+tempResult+"\r\n")...)
+	if config.MailDevMode() {
+		body = append(body, []byte("\r\n ///// MAIL DEVELOPMENT MODE ACTIVE \\\\\\\\\\ \r\n Original receivers:\n\n")...)
+		body = append(body, []byte("To: "+strings.Join(dto.To, ";")+"\n\nCC: "+strings.Join(dto.Cc, ";")+"\n\nBCC: "+strings.Join(dto.Bcc, ";"))...)
+	}
+	/// End of the E-Mail Body
 
 	// Send the finished E-Mail
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body)
-	if err != nil {
-		mailServerErrorHandler(r.Context(), w, r, err)
-		return
+	// Ignore Authentication if it should only be logged into the console
+	if !config.MailLogOnly() {
+		// Authentication
+		auth := smtp.PlainAuth("", from, password, smtpHost)
+
+		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body)
+		if err != nil {
+			mailServerErrorHandler(r.Context(), w, r, err)
+			return
+		}
+		aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail with template (%s/%s) sent. TO: %s. CC: %s. BCC: %s",
+			dto.CommonID, dto.Lang, dto.To, dto.Cc, dto.Bcc)
+	} else {
+		aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail body with template (%s/%s) logged below (**not** sent).", dto.CommonID, dto.Lang)
+		aulogging.Logger.Ctx(r.Context()).Debug().Printf(string(body))
 	}
-	aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail with template (%s/%s) sent. TO: %s. CC: %s. BCC: %s",
-		dto.CommonID, dto.Lang, dto.To, dto.Cc, dto.Bcc)
 
 	w.WriteHeader(http.StatusOK)
 }

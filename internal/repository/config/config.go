@@ -28,6 +28,18 @@ func ServerIdleTimeout() time.Duration {
 	return time.Second * time.Duration(Configuration().Server.IdleTimeout)
 }
 
+func MailLogOnly() bool {
+	return configurationData.Mail.LogOnly
+}
+
+func MailDevMode() bool {
+	return configurationData.Mail.DevMode
+}
+
+func MailDevMails() []string {
+	return configurationData.Mail.DevMails
+}
+
 func EmailFrom() string {
 	return configurationData.Mail.From
 }
