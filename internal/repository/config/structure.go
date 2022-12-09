@@ -73,10 +73,13 @@ type (
 
 	// MailConfig contains values for the mail server
 	MailConfig struct {
-		From     string `yaml:"from"`
-		FromPass string `yaml:"from_password"`
-		Host     string `yaml:"smtp_host"`
-		Port     string `yaml:"smtp_port"`
+		LogOnly  bool     `yaml:"log_only"`
+		DevMode  bool     `yaml:"dev_mode"`
+		DevMails []string `yaml:"dev_mails"`
+		From     string   `yaml:"from"`
+		FromPass string   `yaml:"from_password"`
+		Host     string   `yaml:"smtp_host"`
+		Port     string   `yaml:"smtp_port"`
 	}
 )
 
