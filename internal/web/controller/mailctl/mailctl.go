@@ -123,7 +123,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 			dto.CommonID, dto.Lang, dto.To, dto.Cc, dto.Bcc)
 	} else {
 		aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail body with template (%s/%s) logged below (**not** sent).", dto.CommonID, dto.Lang)
-		aulogging.Logger.Ctx(r.Context()).Debug().Printf(string(body))
+		aulogging.Logger.Ctx(r.Context()).Info().Printf(string(body))
 	}
 
 	w.WriteHeader(http.StatusOK)
