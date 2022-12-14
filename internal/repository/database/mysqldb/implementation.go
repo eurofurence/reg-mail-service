@@ -71,7 +71,7 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template,
 	result := make([]*entity.Template, 0)
 	buffer := entity.Template{}
 
-	rows, err := r.db.Order("id").Find(&buffer).Rows()
+	rows, err := r.db.Model(&buffer).Order("cid, lang").Rows()
 	if err != nil {
 		aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("mysql error during selection of templates: %s", err.Error())
 		return result, err
@@ -84,7 +84,7 @@ func (r *MysqlRepository) GetTemplates(ctx context.Context) ([]*entity.Template,
 	}()
 
 	for rows.Next() {
-		err = rows.Scan(&buffer)
+		err = r.db.ScanRows(rows, &buffer)
 		if err != nil {
 			aulogging.Logger.Ctx(ctx).Error().WithErr(err).Printf("error reading template during find: %s", err.Error())
 			return result, err
