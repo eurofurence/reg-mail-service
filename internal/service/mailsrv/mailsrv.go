@@ -22,11 +22,14 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 		m.SetHeader("To", config.MailDevMails()...)
 	} else {
 		m.SetHeader("To", dto.To...)
-	}
 
-	if !config.MailDevMode() {
-		m.SetHeader("Cc", dto.Cc...)
-		m.SetHeader("Bcc", dto.Bcc...)
+		if len(dto.Cc) > 0 {
+			m.SetHeader("Cc", dto.Cc...)
+		}
+
+		if len(dto.Bcc) > 0 {
+			m.SetHeader("Bcc", dto.Bcc...)
+		}
 	}
 
 	// Set subject & Body
