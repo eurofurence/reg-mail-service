@@ -6,23 +6,24 @@ import (
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
+	"github.com/eurofurence/reg-mail-service/internal/repository/config"
+	"github.com/eurofurence/reg-mail-service/internal/service/mailsrv"
+	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/eurofurence/reg-mail-service/internal/web/filter"
 	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
 	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
-	"net/http"
-	"net/smtp"
-	"net/url"
-	"strings"
-
-	"github.com/eurofurence/reg-mail-service/internal/repository/config"
-	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
+var mailService mailsrv.MailService
 var templateService templatesrv.TemplateService
 
 func init() {
+	mailService = &mailsrv.MailServiceImplData{}
 	templateService = &templatesrv.TemplateServiceImplData{}
 }
 
@@ -64,66 +65,27 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Recipients
-	recipients := append(dto.To, dto.Cc...)
-
-	// Sender
-	from := config.EmailFrom()
-	password := config.EmailFromPassword()
-	smtpHost := config.SmtpHost()
-	smtpPort := config.SmtpPort()
-
-	// Prepare E-Mail Content
+	// Prepare E-Mail Content & Generate Body
 	tempResult := template.Data
 
 	for k, v := range dto.Variables {
 		tempResult = strings.ReplaceAll(tempResult, "{{ "+k+" }}", v)
 	}
 
-	/// Start of the E-Mail Body
-	// Override the recipients to the pre-set developer mails in the config, if development mode is active
-	body := []byte("")
+	// Set Developer Text
 	if config.MailDevMode() {
-		body = []byte("To: " + strings.Join(config.MailDevMails(), ";") + "\r\n")
-	} else {
-		body = []byte("To: " + strings.Join(dto.To, ";") + "\r\n")
+		// Has to be in reverse order in order to have it at the top => Old body gets put under the new one
+		tempResult = "\n ///// END OF DEVELOPMENT MESSAGE \\\\\\\\\\ \n\n" + tempResult
+		tempResult = " To: " + strings.Join(dto.To, ";") + "\n\n CC: " + strings.Join(dto.Cc, ";") + "\n\n BCC: " + strings.Join(dto.Bcc, ";") + tempResult
+		tempResult = "\n ///// MAIL DEVELOPMENT MODE ACTIVE \\\\\\\\\\ \n Original receivers:\n\n" + tempResult
 	}
 
-	// Add Blind CC if any available (and not in Development Mode)
-	if len(dto.Cc) > 0 && !config.MailDevMode() {
-		body = append(body, []byte("Cc: "+strings.Join(dto.Cc, ";")+"\r\n")...)
-	}
+	// Send the E-Mail
+	err = mailService.SendMail(ctx, *dto, *template, tempResult)
 
-	// Add Blind CC if any available (and not in Development Mode)
-	if len(dto.Bcc) > 0 && !config.MailDevMode() {
-		body = append(body, []byte("Bcc: "+strings.Join(dto.Bcc, ";")+"\r\n")...)
-	}
-
-	// Title and Content of E-Mail
-	// Add Development Mode content if Mail Development Mode is active in config
-	body = append(body, []byte("Subject: "+template.Subject+"\r\n"+"\r\n"+tempResult+"\r\n")...)
-	if config.MailDevMode() {
-		body = append(body, []byte("\r\n ///// MAIL DEVELOPMENT MODE ACTIVE \\\\\\\\\\ \r\n Original receivers:\n\n")...)
-		body = append(body, []byte("To: "+strings.Join(dto.To, ";")+"\n\nCC: "+strings.Join(dto.Cc, ";")+"\n\nBCC: "+strings.Join(dto.Bcc, ";"))...)
-	}
-	/// End of the E-Mail Body
-
-	// Send the finished E-Mail
-	// Ignore Authentication if it should only be logged into the console
-	if !config.MailLogOnly() {
-		// Authentication
-		auth := smtp.PlainAuth("", from, password, smtpHost)
-
-		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, recipients, body)
-		if err != nil {
-			mailServerErrorHandler(r.Context(), w, r, err)
-			return
-		}
-		aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail with template (%s/%s) sent. TO: %s. CC: %s. BCC: %s",
-			dto.CommonID, dto.Lang, dto.To, dto.Cc, dto.Bcc)
-	} else {
-		aulogging.Logger.Ctx(r.Context()).Info().Printf("Mail body with template (%s/%s) logged below (**not** sent).", dto.CommonID, dto.Lang)
-		aulogging.Logger.Ctx(r.Context()).Info().Printf(string(body))
+	if err != nil {
+		mailServerErrorHandler(r.Context(), w, r, err)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

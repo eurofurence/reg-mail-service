@@ -3,6 +3,7 @@ package config
 import (
 	"crypto/rsa"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -52,8 +53,9 @@ func SmtpHost() string {
 	return configurationData.Mail.Host
 }
 
-func SmtpPort() string {
-	return configurationData.Mail.Port
+func SmtpPort() int {
+	port, _ := strconv.Atoi(configurationData.Mail.Port)
+	return port
 }
 
 func DatabaseUse() DatabaseType {
