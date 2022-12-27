@@ -1,4 +1,5 @@
 -- keeping these for reference, not currently in use
+SET CHARACTER SET 'utf8mb4';
 
 INSERT INTO `mail_templates` (`id`, `cid`, `lang`, `subject`, `data`, `created_at`, `updated_at`, `deleted_at`) VALUES
 	('076ac048-4a32-11ec-b88e-3431c4db8789', 'changed_email', 'en-US', 'Changed Email', 'Dear {{ nickname }},\r\n\r\nthis is an automated verification message from the Eurofurence \r\nregistration system. You have requested to change your email address and \r\nwe\'d like to ask you to confirm that this email has reached you by \r\nclicking on the link below:\r\n\r\nNew address: {{ new_email }}\r\n{{ link }}\r\n\r\nUntil you verified this email address, all Eurofurence mail will \r\ncontinue to be sent to the previously verified address.\r\n\r\nOld address: {{ email }}\r\n\r\nIf you have any questions, feel free to email us. Simply reply to this \r\nmessage. More information on Eurofurence is available at\r\n\r\n       https://www.eurofurence.org/\r\n\r\nYours,\r\n\r\nThe Eurofurence Team', '2021-11-20 19:45:27', '2021-11-21 11:59:03', NULL),
