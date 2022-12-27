@@ -1,4 +1,5 @@
 -- keeping these for reference, not currently in use
+SET CHARACTER SET 'utf8mb4';
 
 INSERT INTO `mail_templates` (`id`, `cid`, `lang`, `subject`, `data`, `created_at`, `updated_at`, `deleted_at`) VALUES
     ('16e44603-4abb-11ec-9cd3-3431c4db8789', 'roomreq_invite', 'de-DE', 'Gruppen Einladung', 'Liebe(r) {{ nickname }},\r\n\r\n* DU WURDEST EINGELADEN, EINER ZIMMERGRUPPE BEIZUTRETEN.\r\n\r\n{{ room_group_owner }} lädt dich dazu ein, in die Gruppe\r\n"{{ room_group_name }}" einzutreten.\r\n\r\nDu kannst ihn/sie unter {{ room_group_owner_email }} erreichen.\r\n\r\nWenn du die Einladung annehmen willst, musst du dich in das EF-\r\nAnmeldesystem einloggen und der Gruppe beitreten.\r\n\r\nSchöne Grüße,\r\n\r\n    Das EF Anmeldesystem.', '2021-11-21 12:06:34', '2021-11-21 12:06:34', NULL),
