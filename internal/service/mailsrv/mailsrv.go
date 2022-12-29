@@ -39,7 +39,13 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 	// Send E-Mail
 	err := error(nil)
 	if !config.MailLogOnly() {
-		d := gomail.NewDialer(config.SmtpHost(), config.SmtpPort(), config.EmailFrom(), config.EmailFromPassword())
+		d := &gomail.Dialer{Host: config.SmtpHost(), Port: config.SmtpPort()}
+
+		if len(config.EmailFromPassword()) > 0 {
+			d.Username = config.EmailFrom()
+			d.Password = config.EmailFromPassword()
+		}
+
 		err = d.DialAndSend(m)
 
 		aulogging.Logger.Ctx(ctx).Info().Printf("Mail with template (%s/%s) sent. TO: %s. CC: %s. BCC: %s",
