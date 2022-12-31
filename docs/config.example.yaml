@@ -7,9 +7,9 @@ mail:
     - 'developer@example.com'
     - 'another.dev@example.com'
   from: 'no-reply@example.com' # Sender E-Mail Address
-  from_password: 'email-account-password' # Sender E-Mail Passwor
-  smtp_host: 'mail.example.com' # Mailserver Host
-  smtp_port: '587' # Mailserver Port
+  from_password: 'email-account-password' # Sender E-Mail Password
+  smtp_host: 'mail.example.com' # Mail-server Host
+  smtp_port: '587' # Mail-server Port
 database:
   use: 'inmemory' # [inmemory, mysql]
   username: 'db-user-username'
