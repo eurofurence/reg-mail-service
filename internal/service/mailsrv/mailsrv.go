@@ -6,30 +6,35 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctxvalues"
 	"gopkg.in/gomail.v2"
 )
 
 type MailServiceImplData struct {
 }
 
-func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto, template entity.Template, body string) error {
+func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto, template entity.Template, body string, preview bool) error {
 	// Create a new message and set sender
 	m := gomail.NewMessage()
 	m.SetHeader("From", config.EmailFrom())
 
 	// Set recipients
-	if config.MailDevMode() {
-		m.SetHeader("To", config.MailDevMails()...)
+	if !preview {
+		if config.MailDevMode() {
+			m.SetHeader("To", config.MailDevMails()...)
+		} else {
+			m.SetHeader("To", dto.To...)
+
+			if len(dto.Cc) > 0 {
+				m.SetHeader("Cc", dto.Cc...)
+			}
+
+			if len(dto.Bcc) > 0 {
+				m.SetHeader("Bcc", dto.Bcc...)
+			}
+		}
 	} else {
-		m.SetHeader("To", dto.To...)
-
-		if len(dto.Cc) > 0 {
-			m.SetHeader("Cc", dto.Cc...)
-		}
-
-		if len(dto.Bcc) > 0 {
-			m.SetHeader("Bcc", dto.Bcc...)
-		}
+		m.SetHeader("To", ctxvalues.Email(ctx))
 	}
 
 	// Set subject & Body
