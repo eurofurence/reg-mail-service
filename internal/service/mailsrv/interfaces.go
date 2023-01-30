@@ -7,5 +7,5 @@ import (
 )
 
 type MailService interface {
-	SendMail(ctx context.Context, dto mail.MailSendDto, template entity.Template, body string) error
+	SendMail(ctx context.Context, dto mail.MailSendDto, template entity.Template, body string, preview bool) error
 }

@@ -110,6 +110,56 @@ paths:
                 $ref: '#/components/schemas/ErrorDto'
       security:
         - ApiKeyAuth: []
+  /mail/preview:
+    post:
+      tags:
+        - mails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cid:
+                  type: string
+                  example: example_cid
+                lang:
+                  type: string
+                  enum: [ en_US, de_DE ]
+                  example: en_US
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        '200':
+          description: Successfully queued
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The mail server failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: [ ]
   /mail/check:
     get:
       tags:

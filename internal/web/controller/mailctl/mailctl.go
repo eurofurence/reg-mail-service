@@ -29,6 +29,7 @@ func init() {
 
 func Create(server chi.Router) {
 	server.Post("/api/v1/mail", filter.HasRoleOrApiToken(config.OidcAdminRole(), sendMail))
+	server.Post("/api/v1/mail/preview", filter.HasRoleOrApiToken(config.OidcAdminRole(), sendPreviewMail))
 
 	server.Get("/api/v1/mail/check", checkHealth)
 }
@@ -47,7 +48,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	// Parse the received body data to a "MailSendDto"
 	dto, err := parseBodyToMailSendDto(ctx, w, r)
 	if err != nil {
-		mailParseErrorHandler(r.Context(), w, r, err)
+		mailParseErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -61,7 +62,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	// Falls back to en-US if language not found
 	template, err := templateService.GetTemplateByCid(r.Context(), dto.CommonID, dto.Lang)
 	if err != nil {
-		mailParseErrorHandler(r.Context(), w, r, err)
+		mailParseErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -81,10 +82,46 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the E-Mail
-	err = mailService.SendMail(ctx, *dto, *template, tempResult)
+	err = mailService.SendMail(ctx, *dto, *template, tempResult, false)
 
 	if err != nil {
-		mailServerErrorHandler(r.Context(), w, r, err)
+		mailServerErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func sendPreviewMail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Parse the received body data to a "MailSendDto"
+	dto, err := parseBodyToMailSendDto(ctx, w, r)
+	if err != nil {
+		mailParseErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	// Look up template by Common ID and Language
+	// Falls back to en-US if language not found
+	template, err := templateService.GetTemplateByCid(r.Context(), dto.CommonID, dto.Lang)
+	if err != nil {
+		mailParseErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	// Prepare E-Mail Content & Generate Body
+	tempResult := template.Data
+
+	for k, v := range dto.Variables {
+		tempResult = strings.ReplaceAll(tempResult, "{{ "+k+" }}", v)
+	}
+
+	// Send the E-Mail
+	err = mailService.SendMail(ctx, *dto, *template, tempResult, true)
+
+	if err != nil {
+		mailServerErrorHandler(ctx, w, r, err)
 		return
 	}
 
