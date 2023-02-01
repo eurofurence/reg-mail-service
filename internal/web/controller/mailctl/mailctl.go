@@ -3,6 +3,7 @@ package mailctl
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/health"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
@@ -11,6 +12,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/service/templatesrv"
 	"github.com/eurofurence/reg-mail-service/internal/web/filter"
 	"github.com/eurofurence/reg-mail-service/internal/web/util/ctlutil"
+	"github.com/eurofurence/reg-mail-service/internal/web/util/ctxvalues"
 	"github.com/eurofurence/reg-mail-service/internal/web/util/media"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-http-utils/headers"
@@ -82,7 +84,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the E-Mail
-	err = mailService.SendMail(ctx, *dto, *template, tempResult, false)
+	err = mailService.SendMail(ctx, *dto, *template, tempResult)
 
 	if err != nil {
 		mailServerErrorHandler(ctx, w, r, err)
@@ -102,6 +104,18 @@ func sendPreviewMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ensure To, Cc, Bcc unset
+	if len(dto.To) > 0 || len(dto.Cc) > 0 || len(dto.Bcc) > 0 {
+		mailForbiddenErrorHandler(ctx, w, r, errors.New("mail preview not allowed to set target addresses!"))
+		return
+	}
+	email := ctxvalues.Email(ctx)
+	if email == "" {
+		mailForbiddenErrorHandler(ctx, w, r, errors.New("you did not provide an email address in your token!"))
+		return
+	}
+	dto.To = []string{email}
+
 	// Look up template by Common ID and Language
 	// Falls back to en-US if language not found
 	template, err := templateService.GetTemplateByCid(r.Context(), dto.CommonID, dto.Lang)
@@ -118,7 +132,7 @@ func sendPreviewMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the E-Mail
-	err = mailService.SendMail(ctx, *dto, *template, tempResult, true)
+	err = mailService.SendMail(ctx, *dto, *template, tempResult)
 
 	if err != nil {
 		mailServerErrorHandler(ctx, w, r, err)
@@ -153,4 +167,9 @@ func mailServerErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.
 func mailParseErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mail send json body parse error: %s", err.Error())
 	ctlutil.ErrorHandler(ctx, w, r, "mail.parse.error", http.StatusBadRequest, url.Values{"error": {err.Error()}})
+}
+
+func mailForbiddenErrorHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mail send forbidden error: %s", err.Error())
+	ctlutil.ErrorHandler(ctx, w, r, "mail.forbidden.error", http.StatusForbidden, url.Values{"error": {err.Error()}})
 }
