@@ -30,8 +30,8 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Post("/api/v1/mail", filter.HasRoleOrApiToken(config.OidcAdminRole(), sendMail))
-	server.Post("/api/v1/mail/preview", filter.HasRoleOrApiToken(config.OidcAdminRole(), sendPreviewMail))
+	server.Post("/api/v1/mail", filter.HasGroupOrApiToken(config.OidcAdminGroup(), sendMail))
+	server.Post("/api/v1/mail/preview", filter.HasGroupOrApiToken(config.OidcAdminGroup(), sendPreviewMail))
 
 	server.Get("/api/v1/mail/check", checkHealth)
 }

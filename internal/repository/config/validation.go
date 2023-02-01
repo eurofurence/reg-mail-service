@@ -88,7 +88,7 @@ func validateDatabaseConfiguration(errs url.Values, c DatabaseConfig) {
 
 func validateSecurityConfiguration(errs url.Values, c SecurityConfig) {
 	validation.CheckLength(&errs, 16, 256, "security.fixed.api", c.Fixed.Api)
-	validation.CheckLength(&errs, 1, 256, "security.oidc.admin_role", c.Oidc.AdminRole)
+	validation.CheckLength(&errs, 1, 256, "security.oidc.admin_group", c.Oidc.AdminGroup)
 
 	parsedKeySet = make([]*rsa.PublicKey, 0)
 	for i, keyStr := range c.Oidc.TokenPublicKeysPEM {

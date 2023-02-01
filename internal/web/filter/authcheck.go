@@ -8,15 +8,15 @@ import (
 	"net/http"
 )
 
-func HasRoleOrApiToken(role string, handler http.HandlerFunc) http.HandlerFunc {
+func HasGroupOrApiToken(group string, handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		if ctxvalues.HasApiToken(ctx) || ctxvalues.IsAuthorizedAsRole(ctx, role) {
+		if ctxvalues.HasApiToken(ctx) || ctxvalues.IsAuthorizedAsGroup(ctx, group) {
 			handler(w, r)
 		} else {
 			culprit := ctxvalues.Subject(ctx)
 			if culprit != "" {
-				ctlutil.UnauthorizedError(ctx, w, r, "you are not authorized for this operation - the attempt has been logged", fmt.Sprintf("unauthorized access attempt for role %s by %s", role, culprit))
+				ctlutil.UnauthorizedError(ctx, w, r, "you are not authorized for this operation - the attempt has been logged", fmt.Sprintf("unauthorized access attempt for group %s by %s", group, culprit))
 			} else {
 				ctlutil.UnauthenticatedError(ctx, w, r, "you must be logged in for this operation", "anonymous access attempt")
 			}
@@ -49,9 +49,9 @@ func LoggedIn(handler http.HandlerFunc) http.HandlerFunc {
 // IsSubjectOrRoleOrApiToken cannot be used as a filter because the subject needs to be loaded from the database first (part of the attendee admin data). Use in your handler functions.
 //
 // Do not forget to return from the handler if an error is returned!
-func IsSubjectOrRoleOrApiToken(w http.ResponseWriter, r *http.Request, subject string, role string) error {
+func IsSubjectOrGroupOrApiToken(w http.ResponseWriter, r *http.Request, subject string, group string) error {
 	ctx := r.Context()
-	if ctxvalues.HasApiToken(ctx) || ctxvalues.IsAuthorizedAsRole(ctx, role) || ctxvalues.Subject(ctx) == subject {
+	if ctxvalues.HasApiToken(ctx) || ctxvalues.IsAuthorizedAsGroup(ctx, group) || ctxvalues.Subject(ctx) == subject {
 		return nil
 	} else {
 		culprit := ctxvalues.Subject(ctx)

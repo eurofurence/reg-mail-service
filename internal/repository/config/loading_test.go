@@ -91,7 +91,7 @@ security:
   fixed_token:
     api: 'fixed-testing-token-abc'
   oidc:
-    admin_role: 'admin'
+    admin_group: 'admin'
 `
 	err := parseAndOverwriteConfig([]byte(minimalYaml))
 	require.Nil(t, err, "expected no error")

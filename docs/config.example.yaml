@@ -24,8 +24,9 @@ security:
   fixed_token:
     api: 'put_secure_random_string_here_for_api_token'
   oidc:
-    # set this nonempty to also try to read the jwt token from a cookie
-    token_cookie_name: 'JWT'
+    # set this nonempty to read the jwt token from a cookie
+    id_token_cookie_name: 'JWT'
+    access_token_cookie_name: 'AUTH'
     # a list of public RSA keys in PEM format, see https://github.com/Jumpy-Squirrel/jwks2pem for obtaining PEM from openid keyset endpoint
     token_public_keys_PEM:
       - |
@@ -38,12 +39,18 @@ security:
         V6L11BWkpzGXSW4Hv43qa+GSYOD2QU68Mb59oSk2OB+BtOLpJofmbGEGgvmwyCI9
         MwIDAQAB
         -----END PUBLIC KEY-----
-    admin_role: 'admin'
+    admin_group: 'admin'
+    # if you leave this blank, userinfo checks will be skipped
+    auth_service: 'http://localhost:4712' # no trailing slash
+    # optional, but will be checked if set (should set to reject tokens created for other clients than regsys)
+    audience: 'only-allowed-audience-in-tokens'
+    # optional, but will be checked if set
+    issuer: 'only-allowed-issuer-in-tokens'
   cors:
     # set this to true to send disable cors headers - not for production - local/test instances only - will log lots of warnings
     disable: false
     # if setting disable_cors, you should also specify this, as a comma separated list of allowed origins
-    allow_origin: 'http://localhost:8000,http://localhost:8001'
+    allow_origin: 'http://localhost:8000'
 logging:
   severity: INFO
   style: plain # or ecs (elastic common schema), the default
