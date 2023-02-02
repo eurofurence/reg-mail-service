@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/eurofurence/reg-mail-service/internal/repository/authservice"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database"
 )
@@ -29,6 +30,10 @@ func (i *Impl) Run() int {
 	}
 	defer database.Close()
 	if err := database.MigrateIfSwitchedOn(); err != nil {
+		return 1
+	}
+
+	if err := authservice.Create(); err != nil {
 		return 1
 	}
 

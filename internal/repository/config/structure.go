@@ -54,10 +54,13 @@ type (
 	}
 
 	OpenIdConnectConfig struct {
-		TokenCookieName    string   `yaml:"token_cookie_name"`     // optional, if set, the jwt token is also read from this cookie (useful for mixed web application setups, see reg-auth-service)
-		TokenPublicKeysPEM []string `yaml:"token_public_keys_PEM"` // a list of public RSA keys in PEM format, see https://github.com/Jumpy-Squirrel/jwks2pem for obtaining PEM from openid keyset endpoint
-		UserInfoURL        string   `yaml:"user_info_url"`         // validation of admin accesses uses this endpoint to verify the token is still current and access has not been recently revoked
-		AdminRole          string   `yaml:"admin_role"`            // the role/group claim that supplies admin rights
+		IdTokenCookieName     string   `yaml:"id_token_cookie_name"`     // optional, but must both be set, then tokens are read from cookies
+		AccessTokenCookieName string   `yaml:"access_token_cookie_name"` // optional, but must both be set, then tokens are read from cookies
+		TokenPublicKeysPEM    []string `yaml:"token_public_keys_PEM"`    // a list of public RSA keys in PEM format, see https://github.com/Jumpy-Squirrel/jwks2pem for obtaining PEM from openid keyset endpoint
+		AdminGroup            string   `yaml:"admin_group"`              // the group claim that supplies admin rights
+		AuthService           string   `yaml:"auth_service"`             // base url, usually http://localhost:nnnn, will skip userinfo checks if unset
+		Audience              string   `yaml:"audience"`
+		Issuer                string   `yaml:"issuer"`
 	}
 
 	CorsConfig struct {

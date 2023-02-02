@@ -80,16 +80,32 @@ func FixedApiToken() string {
 	return Configuration().Security.Fixed.Api
 }
 
-func OidcTokenCookieName() string {
-	return Configuration().Security.Oidc.TokenCookieName
+func OidcIdTokenCookieName() string {
+	return Configuration().Security.Oidc.IdTokenCookieName
+}
+
+func OidcAccessTokenCookieName() string {
+	return Configuration().Security.Oidc.AccessTokenCookieName
 }
 
 func OidcKeySet() []*rsa.PublicKey {
 	return parsedKeySet
 }
 
-func OidcAdminRole() string {
-	return Configuration().Security.Oidc.AdminRole
+func OidcAdminGroup() string {
+	return Configuration().Security.Oidc.AdminGroup
+}
+
+func OidcAllowedAudience() string {
+	return Configuration().Security.Oidc.Audience
+}
+
+func OidcAllowedIssuer() string {
+	return Configuration().Security.Oidc.Issuer
+}
+
+func AuthServiceBaseUrl() string {
+	return Configuration().Security.Oidc.AuthService
 }
 
 func IsCorsDisabled() bool {

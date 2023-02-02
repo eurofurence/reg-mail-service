@@ -24,11 +24,11 @@ func init() {
 }
 
 func Create(server chi.Router) {
-	server.Get("/api/v1/templates", filter.HasRoleOrApiToken(config.OidcAdminRole(), getTemplates))
-	server.Post("/api/v1/templates", filter.HasRoleOrApiToken(config.OidcAdminRole(), createTemplate))
-	server.Get("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), getTemplate))
-	server.Put("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), updateTemplate))
-	server.Delete("/api/v1/templates/{uuid}", filter.HasRoleOrApiToken(config.OidcAdminRole(), deleteTemplate))
+	server.Get("/api/v1/templates", filter.HasGroupOrApiToken(config.OidcAdminGroup(), getTemplates))
+	server.Post("/api/v1/templates", filter.HasGroupOrApiToken(config.OidcAdminGroup(), createTemplate))
+	server.Get("/api/v1/templates/{uuid}", filter.HasGroupOrApiToken(config.OidcAdminGroup(), getTemplate))
+	server.Put("/api/v1/templates/{uuid}", filter.HasGroupOrApiToken(config.OidcAdminGroup(), updateTemplate))
+	server.Delete("/api/v1/templates/{uuid}", filter.HasGroupOrApiToken(config.OidcAdminGroup(), deleteTemplate))
 }
 
 func getTemplates(w http.ResponseWriter, r *http.Request) {
