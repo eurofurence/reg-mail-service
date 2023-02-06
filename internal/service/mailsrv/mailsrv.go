@@ -2,6 +2,7 @@ package mailsrv
 
 import (
 	"context"
+	"fmt"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
@@ -18,11 +19,13 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 	m := gomail.NewMessage()
 	m.SetHeader("From", config.EmailFrom())
 
-	// Set recipients
+	// Set recipients & Subject
 	if config.MailDevMode() {
 		m.SetHeader("To", config.MailDevMails()...)
+		m.SetHeader("Subject", fmt.Sprintf("[regtest] %s", template.Subject))
 	} else {
 		m.SetHeader("To", dto.To...)
+		m.SetHeader("Subject", template.Subject)
 
 		if len(dto.Cc) > 0 {
 			m.SetHeader("Cc", dto.Cc...)
@@ -33,8 +36,7 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 		}
 	}
 
-	// Set subject & Body
-	m.SetHeader("Subject", template.Subject)
+	// Set Body
 	m.SetBody("text/plain", body)
 
 	// Send E-Mail
