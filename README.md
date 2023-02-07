@@ -1,7 +1,6 @@
 # reg-mail-service
 
 <img src="https://github.com/eurofurence/reg-mail-service/actions/workflows/go.yml/badge.svg" alt="test status"/>
-<img src="https://github.com/eurofurence/reg-mail-service/actions/workflows/codeql-analysis.yml/badge.svg" alt="code quality status"/>
 
 ## Overview
 
@@ -22,3 +21,7 @@ Then configure all variables as needed.
 
 If you place this repository OUTSIDE of your gopath, `go build main.go` and `go test ./...` will download all
 required dependencies by default.
+
+## Open Issues and Ideas
+
+We track open issues as GitHub issues on this repository once it becomes clear what exactly needs to be done.
