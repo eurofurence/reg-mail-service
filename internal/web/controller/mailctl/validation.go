@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-const emailPattern = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+const emailPattern = `^[^@\s]+@[^@\s]+$`
 const langPattern = "^[a-z]{2}-[A-Z]{2}$"
 
 func validate(ctx context.Context, a *mail.MailSendDto) url.Values {

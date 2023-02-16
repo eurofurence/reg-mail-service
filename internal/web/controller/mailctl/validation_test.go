@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"github.com/eurofurence/reg-mail-service/docs"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
+	"github.com/stretchr/testify/require"
 	"net/url"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -37,4 +39,16 @@ func performValidationTest(t *testing.T, a *mail.MailSendDto, expectedErrors url
 	if !reflect.DeepEqual(actualErrors, expectedErrors) {
 		t.Errorf("Errors were not as expected.\nActual:\n%v\nExpected:\n%v\n", string(prettyPrintedActualErrors), string(prettyPrintedExpectedErrors))
 	}
+}
+
+func TestMailRegexp(t *testing.T) {
+	re := regexp.MustCompile(emailPattern)
+
+	require.True(t, re.MatchString("a@b"))
+	require.True(t, re.MatchString("jsquirrel_github_9a6d@packetloss.de"))
+	require.True(t, re.MatchString("Super1+Super0-9Unusual324oi9e73289472347@Hihihi.there.com"))
+	require.False(t, re.MatchString(" space@start"))
+	require.False(t, re.MatchString("space@end "))
+	require.False(t, re.MatchString("space@in side"))
+	require.False(t, re.MatchString("more space@inside.de"))
 }

@@ -52,8 +52,10 @@ func validateLoggingConfiguration(errs url.Values, c LoggingConfig) {
 	}
 }
 
+const mailRegexp = `^[^@\s]+@[^@\s]+$`
+
 func validateMailConfiguration(errs url.Values, m MailConfig) {
-	re := regexp.MustCompile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+	re := regexp.MustCompile(mailRegexp)
 
 	if m.From == "" {
 		errs.Add("mail.from", m.From+" cannot be empty")
