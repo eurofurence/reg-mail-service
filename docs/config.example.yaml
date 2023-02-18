@@ -6,6 +6,8 @@ mail:
   dev_mails:
     - 'developer@example.com'
     - 'another.dev@example.com'
+  # optional debug option that adds this mail address to Bcc on every email sent
+  # add_auto_bcc: 'debug@example.com'
   from: 'no-reply@example.com' # Sender E-Mail Address
   from_password: 'email-account-password' # Sender E-Mail Password
   smtp_host: 'mail.example.com' # Mail-server Host
