@@ -41,6 +41,10 @@ func MailDevMails() []string {
 	return configurationData.Mail.DevMails
 }
 
+func AddAutoBcc() string {
+	return configurationData.Mail.AddAutoBcc
+}
+
 func EmailFrom() string {
 	return configurationData.Mail.From
 }

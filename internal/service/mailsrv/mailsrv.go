@@ -31,6 +31,11 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 			m.SetHeader("Cc", dto.Cc...)
 		}
 
+		// add extra Bcc if configured
+		if config.AddAutoBcc() != "" {
+			dto.Bcc = append(dto.Bcc, config.AddAutoBcc())
+		}
+
 		if len(dto.Bcc) > 0 {
 			m.SetHeader("Bcc", dto.Bcc...)
 		}
