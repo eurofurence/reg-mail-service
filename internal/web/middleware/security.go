@@ -74,6 +74,12 @@ func checkAccessToken_MustReturnOnError(ctx context.Context, accessTokenValue st
 				return false, fmt.Errorf("request failed access token check, denying: %s", err.Error())
 			}
 
+			if config.OidcAllowedAudience() != "" {
+				if len(userInfo.Audiences) != 1 || userInfo.Audiences[0] != config.OidcAllowedAudience() {
+					return false, errors.New("token audience does not match")
+				}
+			}
+
 			ctxvalues.SetName(ctx, userInfo.Name)
 			ctxvalues.SetSubject(ctx, userInfo.Subject)
 			ctxvalues.SetEmail(ctx, userInfo.Email)
