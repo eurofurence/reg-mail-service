@@ -9,7 +9,7 @@ info:
     name: "MIT"
     url: "https://opensource.org/licenses/MIT"
 servers:
-  - url: '{protocol}://localhost:{port}/api/v1'
+  - url: '{protocol}://localhost:{port}/api'
     description: Local development instance.
     variables:
       protocol:
@@ -24,12 +24,16 @@ servers:
           - '8181'
         default: '9093'
 tags:
-  - name: mails
+  - name: mails/v1
     description: Mail Service
-  - name: templates
+  - name: templates/v1
     description: Template Service
+  - name: mails/v2
+    description: Mail Service V2
+  - name: templates/v2
+    description: Template Service V2
 paths:
-  /health:
+  /v1/health:
     get:
       summary: Check service health
       description: Service health not including transitive dependencies.
@@ -45,10 +49,10 @@ paths:
                     type: string
                     enum: [up, down]
                     example: up
-  /mail:
+  /v1/mail:
     post:
       tags:
-        - mails
+        - mails/v1
       requestBody:
         content:
           application/json:
@@ -110,10 +114,10 @@ paths:
                 $ref: '#/components/schemas/ErrorDto'
       security:
         - ApiKeyAuth: []
-  /mail/preview:
+  /v1/mail/preview:
     post:
       tags:
-        - mails
+        - mails/v1
       requestBody:
         content:
           application/json:
@@ -160,10 +164,10 @@ paths:
                 $ref: '#/components/schemas/ErrorDto'
       security:
         - ApiKeyAuth: [ ]
-  /mail/check:
+  /v1/mail/check:
     get:
       tags:
-        - mails
+        - mails/v1
       summary: Check Mail Server Health
       description: The mail health check will return 200 if everything is alright.
       responses:
@@ -177,10 +181,10 @@ paths:
                 $ref: '#/components/schemas/ErrorDto'
       security:
         - ApiKeyAuth: []
-  /templates:
+  /v1/templates:
     get:
       tags:
-        - templates
+        - templates/v1
       summary: Get template by Common ID
       description: The template with matching Common ID and Language is being returned.
       parameters:
@@ -232,7 +236,7 @@ paths:
         - BearerAuth: []
     post:
       tags:
-        - templates
+        - templates/v1
       summary: create a new template
       description: create a new template
       requestBody:
@@ -275,10 +279,10 @@ paths:
       security:
         - ApiKeyAuth: []
         - BearerAuth: []
-  /templates/{uuid}:
+  /v1/templates/{uuid}:
     get:
       tags:
-        - templates
+        - templates/v1
       summary: Fetch template
       description: Get the template from the Database by the UUID.
       parameters:
@@ -325,7 +329,7 @@ paths:
         - BearerAuth: []
     put:
       tags:
-        - templates
+        - templates/v1
       summary: Update template
       description: Update a specific template in the Database by UUID.
       parameters:
@@ -372,10 +376,397 @@ paths:
         - BearerAuth: []
     delete:
       tags:
-        - templates
+        - templates/v1
       summary: Archive template
       description: Archive a specific template by UUID.
       parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: The UUID of the template to get
+      responses:
+        '204':
+          description: Template successfully archived.
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+  /v2/tenants/{tenant}/mail:
+    post:
+      tags:
+        - mails/v2
+      summary: Send an email
+      description: Render a template and send an email
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailV2'
+      responses:
+        '200':
+          description: Successfully queued
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key or correct bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '403':
+          description: You are not allowed to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found or tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '500':
+          description: An unexpected error occurred. A best effort attempt is made to return details in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: The mail server failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+  /v2/tenants/{tenant}/mail/preview:
+    post:
+      tags:
+        - mails/v2
+      summary: Send a preview
+      description: Render a template and send an email to the email address of the current user (!)
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailV2Preview'
+      responses:
+        '200':
+          description: Successfully queued
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The mail server failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: [ ]
+  /v2/tenants/{tenant}/templates:
+    get:
+      tags:
+        - templates/v2
+      summary: Find/List templates
+      description: The templates with matching Tenant, Common ID and Language are returned.
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+        - name: cid
+          in: query
+          description: the common id (cid), optional, leave blank to list all cids
+          schema:
+            type: string
+            example: ready-for-payment
+        - name: lang
+          in: query
+          description: the locale, optional, leave blank to list all locales
+          schema:
+            type: string
+            example: de-DE
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateListDtoV2'
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key or a valid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No templates found, or no such tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '500':
+          description: An unexpected error occurred. A best effort attempt is made to return details in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+    post:
+      tags:
+        - templates/v2
+      summary: create a new template
+      description: create a new template for this tenant
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDtoV2'
+      responses:
+        '201':
+          description: the template was successfully saved
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL of the created resource, ending in the assigned Badge number.
+        '400':
+          description: body or values invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '409':
+          description: A template for this cid and language already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+  /v2/tenants/{tenant}/templates/{uuid}:
+    get:
+      tags:
+        - templates/v2
+      summary: Fetch template
+      description: Get the template from the Database by the UUID.
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+        - in: path
+          name: uuid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The UUID of the template to get
+      responses:
+        '200':
+          description: Template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDtoV2'
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+    put:
+      tags:
+        - templates/v2
+      summary: Update template
+      description: Update a specific template in the Database by UUID.
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: The UUID of the template to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDtoV2'
+      responses:
+        '204':
+          description: Template successfully updated.
+        '400':
+          description: Parameters are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: You have to supply the correct api token in header X-Api-Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '404':
+          description: No template found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '502':
+          description: The database failed to respond
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+    delete:
+      tags:
+        - templates/v2
+      summary: Archive template
+      description: Archive a specific template by UUID.
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          description: the tenant (valid values are listed in configuration)
+          schema:
+            type: string
+            example: regsys
         - in: path
           name: uuid
           schema:
@@ -443,6 +834,7 @@ components:
             - template.database.error (problem with database)
             - template.notfound.error (template does not exist in database)
             - template.parse.error (json body parse error)
+            - tenant.notfound.error (tenant is not in the list in configuration)
           example: mail.server.error
         details:
           type: array
@@ -487,6 +879,134 @@ components:
         updated_at:
           type: string
           format: date-time
+    TemplateListDtoV2:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateDtoV2'
+    TemplateDtoV2:
+      type: object
+      required:
+        - cid
+        - lang
+        - subject
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: the id of the template. Ignored on incoming request. If specified, must match the uuid from the path, and must be empty for creation.
+        cid:
+          type: string
+          example: example_cid
+        lang:
+          type: string
+          example: en-US
+          description: if a language version is not available, a configurable default is used
+        subject:
+          type: string
+          example: Make money fast
+          description: the email subject
+        text:
+          type: string
+          example: 'Template Content with Variables in golang text/template style {{ nickname }}'
+          description: The text to use for text only mail (optional)
+        html:
+          type: string
+          example: 'Template Content with Variables in golang text/html style {{ nickname }}'
+          description: The text to use for html mail (optional)
+        attachments:
+          type: array
+          description: 'fixed attachments to attach to the mail, in base64 encoded format. Note: the send mail API was also expanded with individual attachments, which are appended to the fixed attachments.'
+          items:
+            type: string
+            format: base64
+        embedded:
+          type: array
+          description: 'fixed embedded attachments to attach to the mail, in base64 encoded format. These can be referenced in the mail text by using something like <img src="cid:image.jpg" alt="My image" />. Note: the send mail API was also expanded with individual embeddings, which are appended to the fixed embeddings.'
+          items:
+            type: string
+            format: base64
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    MailV2:
+      type: object
+      required:
+        - cid
+        - lang
+      properties:
+        cid:
+          type: string
+          example: example_cid
+        lang:
+          type: string
+          enum: [en_US, de_DE]
+          example: en_US
+        to:
+          type: array
+          items:
+            type: string
+            format: email
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+        bcc:
+          type: array
+          items:
+            type: string
+            format: email
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+        attachments:
+          type: array
+          description: 'optional extra attachments to attach to the mail after the fixed attachments from the template, in base64 encoded format.'
+          items:
+            type: string
+            format: base64
+        embedded:
+          type: array
+          description: 'optional extra embedded attachments to attach to the mail after the fixed embedded attachments, in base64 encoded format. These can be referenced in the mail text by using something like <img src="cid:image.jpg" alt="My image" />.'
+          items:
+            type: string
+            format: base64
+    MailV2Preview:
+      type: object
+      required:
+        - cid
+        - lang
+      properties:
+        cid:
+          type: string
+          example: example_cid
+        lang:
+          type: string
+          enum: [en_US, de_DE]
+          example: en_US
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+        attachments:
+          type: array
+          description: 'optional extra attachments to attach to the mail after the fixed attachments from the template, in base64 encoded format.'
+          items:
+            type: string
+            format: base64
+        embedded:
+          type: array
+          description: 'optional extra embedded attachments to attach to the mail after the fixed embedded attachments, in base64 encoded format. These can be referenced in the mail text by using something like <img src="cid:image.jpg" alt="My image" />.'
+          items:
+            type: string
+            format: base64
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
