@@ -12,7 +12,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/rs/zerolog v1.29.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.0
