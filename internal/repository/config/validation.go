@@ -52,7 +52,7 @@ func validateLoggingConfiguration(errs url.Values, c LoggingConfig) {
 	}
 }
 
-const mailRegexp = `^[^@\s]+@[^@\s]+$`
+const mailRegexp = `^.+ <[^@\s]+@[^@\s]+>$`
 
 func validateMailConfiguration(errs url.Values, m MailConfig) {
 	re := regexp.MustCompile(mailRegexp)

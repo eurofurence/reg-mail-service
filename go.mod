@@ -3,6 +3,7 @@ module github.com/eurofurence/reg-mail-service
 go 1.19
 
 require (
+	github.com/Shopify/gomail v0.0.0-20220729171026-0784ece65e69
 	github.com/StephanHCB/go-autumn-logging v0.3.0
 	github.com/StephanHCB/go-autumn-logging-zerolog v0.4.0
 	github.com/StephanHCB/go-autumn-restclient v0.5.0
@@ -13,7 +14,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
-	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
