@@ -3,11 +3,11 @@ package mailsrv
 import (
 	"context"
 	"fmt"
+	"github.com/Shopify/gomail"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/api/v1/mail"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
-	"gopkg.in/gomail.v2"
 	"strings"
 )
 
