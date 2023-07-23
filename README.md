@@ -19,7 +19,7 @@ Copy config.example.yaml from the docs/ directory into the project root. Rename 
 config.yaml
 Then configure all variables as needed.
 
-If you place this repository OUTSIDE of your gopath, `go build main.go` and `go test ./...` will download all
+If you place this repository OUTSIDE your gopath, `go build main.go` and `go test ./...` will download all
 required dependencies by default.
 
 ## Open Issues and Ideas
