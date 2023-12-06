@@ -6,6 +6,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/web/util/validation"
 	"github.com/golang-jwt/jwt/v4"
 	"net/url"
+	"os"
 	"regexp"
 )
 
@@ -30,6 +31,24 @@ func setConfigurationDefaults(c *Application) {
 	}
 	if c.Security.Cors.AllowOrigin == "" {
 		c.Security.Cors.AllowOrigin = "*"
+	}
+}
+
+const (
+	envSmtpPassword = "REG_SECRET_SMTP_PASSWORD"
+	envDbPassword   = "REG_SECRET_DB_PASSWORD"
+	envApiToken     = "REG_SECRET_API_TOKEN"
+)
+
+func applyEnvVarOverrides(c *Application) {
+	if smtpPassword := os.Getenv(envSmtpPassword); smtpPassword != "" {
+		c.Mail.FromPass = smtpPassword
+	}
+	if dbPassword := os.Getenv(envDbPassword); dbPassword != "" {
+		c.Database.Password = dbPassword
+	}
+	if apiToken := os.Getenv(envApiToken); apiToken != "" {
+		c.Security.Fixed.Api = apiToken
 	}
 }
 
