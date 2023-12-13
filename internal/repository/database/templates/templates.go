@@ -20,22 +20,25 @@ func SeedDefaultTemplates(ctx context.Context, db dbrepo.Repository) error {
 		return err
 	}
 
-	for _, tpl := range defaultTemplates {
-		alreadyExists := false
-		for _, ex := range existing {
-			if tpl.CommonID == ex.CommonID && tpl.Language == ex.Language {
-				alreadyExists = true
+	for _, lang := range defaultLanguages {
+		for _, tpl := range defaultTemplates {
+			alreadyExists := false
+			for _, ex := range existing {
+				if tpl.CommonID == ex.CommonID && tpl.Language == ex.Language {
+					alreadyExists = true
+				}
 			}
-		}
 
-		if !alreadyExists {
-			newId, _ := uuid.NewUUID()
-			tpl.ID = newId.String()
+			if !alreadyExists {
+				newId, _ := uuid.NewUUID()
+				tpl.ID = newId.String()
+				tpl.Language = lang
 
-			aulogging.Logger.NoCtx().Info().Printf("creating required template %s %s with subject '%s' and default text", tpl.CommonID, tpl.Language, tpl.Subject)
-			err := db.CreateTemplate(ctx, &tpl)
-			if err != nil {
-				aulogging.Logger.NoCtx().Error().WithErr(err).Printf("failed to create required template %s %s: %s", tpl.CommonID, tpl.Language, err.Error())
+				aulogging.Logger.NoCtx().Info().Printf("creating required template %s %s with subject '%s' and default text", tpl.CommonID, tpl.Language, tpl.Subject)
+				err := db.CreateTemplate(ctx, &tpl)
+				if err != nil {
+					aulogging.Logger.NoCtx().Error().WithErr(err).Printf("failed to create required template %s %s: %s", tpl.CommonID, tpl.Language, err.Error())
+				}
 			}
 		}
 	}
@@ -43,10 +46,11 @@ func SeedDefaultTemplates(ctx context.Context, db dbrepo.Repository) error {
 	return nil
 }
 
+var defaultLanguages = []string{"en-US", "de-DE"}
+
 var defaultTemplates []entity.Template = []entity.Template{
 	{
 		CommonID: "change-status-approved",
-		Language: "en-US",
 		Subject:  "Registration Confirmed - Please Pay",
 		Data: `Dear {{ nickname }},
 
@@ -75,7 +79,6 @@ Dues Remaining                   :   {{ remaining_dues }}
 	},
 	{
 		CommonID: "change-status-cancelled",
-		Language: "en-US",
 		Subject:  "Registration Cancelled",
 		Data: `Dear {{ nickname }},
 
@@ -91,7 +94,6 @@ The Registration Team`,
 	},
 	{
 		CommonID: "change-status-new",
-		Language: "en-US",
 		Subject:  "New Registration",
 		Data: `Dear {{ nickname }},
 
@@ -110,7 +112,6 @@ The Registration Team
 	},
 	{
 		CommonID: "change-status-paid",
-		Language: "en-US",
 		Subject:  "Registration Paid",
 		Data: `Dear {{ nickname }},
 
@@ -140,7 +141,6 @@ Dues Remaining                   :   {{ remaining_dues }}
 	},
 	{
 		CommonID: "change-status-partially paid",
-		Language: "en-US",
 		Subject:  "Partial Payment - Please Pay Remaining Amount",
 		Data: `Dear {{ nickname }},
 
@@ -169,7 +169,6 @@ Dues Remaining                   :   {{ remaining_dues }}
 	},
 	{
 		CommonID: "change-status-waiting",
-		Language: "en-US",
 		Subject:  "On the Waiting List",
 		Data: `Dear {{ nickname }},
 
@@ -209,7 +208,6 @@ Nickname                         :   {{ nickname }}
 	},
 	{
 		CommonID: "guest",
-		Language: "en-US",
 		Subject:  "Guest of the Convention",
 		Data: `Hello and welcome!
 
@@ -239,7 +237,6 @@ Nickname                         :   {{ nickname }}
 	},
 	{
 		CommonID: "payment-cncrd-adapter-error",
-		Language: "en-US",
 		Subject:  "Payment Adapter Error Notice",
 		Data: `Encountered an unexpected condition during {{ operation }}
 
