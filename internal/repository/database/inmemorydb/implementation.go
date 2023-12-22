@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
+	"github.com/eurofurence/reg-mail-service/internal/repository/database/templates"
 	"time"
 )
 
@@ -26,7 +27,7 @@ func (r *InmemoryRepository) Close() {
 }
 
 func (r *InmemoryRepository) Migrate() error {
-	// nothing to do
+	_ = templates.SeedDefaultTemplates(context.Background(), r)
 	return nil
 }
 
