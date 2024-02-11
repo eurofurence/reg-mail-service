@@ -2,6 +2,8 @@ package mailsrv
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"github.com/Shopify/gomail"
 	aulogging "github.com/StephanHCB/go-autumn-logging"
@@ -9,6 +11,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"strings"
+	"time"
 )
 
 type MailServiceImplData struct {
@@ -18,6 +21,9 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 	// Create a new message and set sender
 	m := gomail.NewMessage()
 	m.SetHeader("From", config.EmailFrom())
+	if config.MessageIdDomain() != "" {
+		m.SetHeader("Message-ID", generateMessageId(ctx, config.MessageIdDomain()))
+	}
 
 	// Set recipients & Subject
 	if config.MailDevMode() {
@@ -79,4 +85,28 @@ func logTargets(ctx context.Context, dto mail.MailSendDto) {
 	if len(dto.Bcc) > 0 {
 		aulogging.Logger.Ctx(ctx).Info().Printf("Bcc: %s", strings.Join(dto.Bcc, ", "))
 	}
+}
+
+const messageIdTimestampFormat = "20060102150405.000"
+
+var fallbackToken uint8 = 0
+
+func generateMessageId(ctx context.Context, domain string) string {
+	timestamp := time.Now().Format(messageIdTimestampFormat)
+
+	token := make([]byte, 4)
+	_, err := rand.Read(token)
+	if err != nil {
+		aulogging.Logger.Ctx(ctx).Warn().Printf("failed to generate random token for message id - using counter")
+		f := fallbackToken
+		token = []byte{0, 0, 0, f}
+		if f == 255 {
+			fallbackToken = 0
+		} else {
+			fallbackToken = f + 1
+		}
+	}
+	hexToken := hex.EncodeToString(token)
+
+	return fmt.Sprintf("<%s.%s@%s>", timestamp, hexToken, domain)
 }

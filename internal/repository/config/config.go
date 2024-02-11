@@ -45,6 +45,10 @@ func AddAutoBcc() string {
 	return configurationData.Mail.AddAutoBcc
 }
 
+func MessageIdDomain() string {
+	return configurationData.Mail.MessageIdDomain
+}
+
 func EmailFrom() string {
 	return configurationData.Mail.From
 }
