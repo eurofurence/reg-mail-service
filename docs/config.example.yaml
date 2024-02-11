@@ -12,6 +12,7 @@ mail:
   from_password: 'email-account-password' # Sender E-Mail Password
   smtp_host: 'mail.example.com' # Mail-server Host
   smtp_port: '587' # Mail-server Port
+  message_id_domain: 'example.com'
 database:
   use: 'inmemory' # [inmemory, mysql]
   username: 'db-user-username'
