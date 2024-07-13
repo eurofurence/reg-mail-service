@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Shopify/gomail v0.0.0-20220729171026-0784ece65e69
-	github.com/StephanHCB/go-autumn-logging v0.3.0
+	github.com/StephanHCB/go-autumn-logging v0.4.0
 	github.com/StephanHCB/go-autumn-logging-zerolog v0.5.0
 	github.com/StephanHCB/go-autumn-restclient v0.8.0
 	github.com/StephanHCB/go-autumn-restclient-circuitbreaker v0.4.1
