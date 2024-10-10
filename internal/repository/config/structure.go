@@ -25,11 +25,12 @@ type (
 
 	// ServerConfig contains all values for http configuration
 	ServerConfig struct {
-		Address      string `yaml:"address"`
-		Port         string `yaml:"port"`
-		ReadTimeout  int    `yaml:"read_timeout_seconds"`
-		WriteTimeout int    `yaml:"write_timeout_seconds"`
-		IdleTimeout  int    `yaml:"idle_timeout_seconds"`
+		Address      string   `yaml:"address"`
+		Port         string   `yaml:"port"`
+		ReadTimeout  int      `yaml:"read_timeout_seconds"`
+		WriteTimeout int      `yaml:"write_timeout_seconds"`
+		IdleTimeout  int      `yaml:"idle_timeout_seconds"`
+		Tenants      []string `yaml:"tenants"` // a list of valid tenants for the v2 api (e.g.: 'regsys')
 	}
 
 	// DatabaseConfig configures which db to use (mysql, inmemory)

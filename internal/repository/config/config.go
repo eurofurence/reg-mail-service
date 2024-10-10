@@ -29,6 +29,10 @@ func ServerIdleTimeout() time.Duration {
 	return time.Second * time.Duration(Configuration().Server.IdleTimeout)
 }
 
+func ServerTenants() []string {
+	return Configuration().Server.Tenants
+}
+
 func MailLogOnly() bool {
 	return configurationData.Mail.LogOnly
 }

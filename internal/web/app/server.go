@@ -7,7 +7,9 @@ import (
 	"github.com/StephanHCB/go-autumn-logging-zerolog/loggermiddleware"
 	"github.com/eurofurence/reg-mail-service/internal/web/controller/healthctl"
 	"github.com/eurofurence/reg-mail-service/internal/web/controller/mailctl"
+	mailctlv2 "github.com/eurofurence/reg-mail-service/internal/web/controller/mailctl/v2"
 	"github.com/eurofurence/reg-mail-service/internal/web/controller/templatectl"
+	templatectlv2 "github.com/eurofurence/reg-mail-service/internal/web/controller/templatectl/v2"
 	middleware2 "github.com/eurofurence/reg-mail-service/internal/web/middleware"
 	"net"
 	"net/http"
@@ -33,7 +35,9 @@ func CreateRouter(ctx context.Context) chi.Router {
 
 	healthctl.Create(server)
 	mailctl.Create(server)
+	mailctlv2.Create(server)
 	templatectl.Create(server)
+	templatectlv2.Create(server)
 	return server
 }
 

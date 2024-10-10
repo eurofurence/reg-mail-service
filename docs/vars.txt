@@ -39,3 +39,4 @@ deleted_at: Database entry deleted Timestamp
 
 // SPECIAL FIELDS
 {{ new_email }} -- For: email_changed
+{{ embed:content_type:attachment_name }} -- For: Embeds inside mails (Example: 'embed:image/png:<base64>')

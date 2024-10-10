@@ -61,6 +61,10 @@ func validateServerConfiguration(errs url.Values, c ServerConfig) {
 	validation.CheckIntValueRange(&errs, 1, 300, "server.read_timeout_seconds", c.ReadTimeout)
 	validation.CheckIntValueRange(&errs, 1, 300, "server.write_timeout_seconds", c.WriteTimeout)
 	validation.CheckIntValueRange(&errs, 1, 300, "server.idle_timeout_seconds", c.IdleTimeout)
+
+	if len(c.Tenants) == 0 {
+		errs.Add("server.tenants", "must contain at least one tenant")
+	}
 }
 
 var allowedSeverities = []string{"DEBUG", "INFO", "WARN", "ERROR"}
