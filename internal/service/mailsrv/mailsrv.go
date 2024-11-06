@@ -25,7 +25,7 @@ func (s *MailServiceImplData) SendMail(ctx context.Context, dto mail.MailSendDto
 		m.SetHeader("Message-ID", generateMessageId(ctx, config.MessageIdDomain()))
 	}
 	// Avoid getting auto-response emails and triggering spam filters
-	m.SetHeader("Precedence", "Bulk")
+	m.SetHeader("Precedence", "bulk")
 
 	// Set recipients & Subject
 	if config.MailDevMode() {
