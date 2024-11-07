@@ -6,6 +6,7 @@ import (
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/templates"
+	"sort"
 	"time"
 )
 
@@ -37,7 +38,20 @@ func (r *InmemoryRepository) GetTemplates(ctx context.Context) ([]*entity.Templa
 		copiedTemplate := *value
 		result = append(result, &copiedTemplate)
 	}
+	sort.Slice(result, func(i, j int) bool {
+		return templateLess(result[i], result[j])
+	})
 	return result, nil
+}
+
+func templateLess(a *entity.Template, b *entity.Template) bool {
+	if a == nil || b == nil {
+		return b != nil
+	}
+	if a.CommonID != b.CommonID {
+		return a.CommonID < b.CommonID
+	}
+	return a.Language < b.Language
 }
 
 func (r *InmemoryRepository) CreateTemplate(ctx context.Context, tpl *entity.Template) error {

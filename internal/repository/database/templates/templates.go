@@ -246,4 +246,222 @@ Status:      {{ status }}
 Please have a look at the logs for details.
 `,
 	},
+	// roomshare groups: mails to group owner
+	//
+	// nickname, groupname, object_badge_number, object_nickname
+	{
+		CommonID: "group-member-joined",
+		Subject:  "New group member",
+		Data: `Dear {{ nickname }}!
+
+A furry named
+
+{{ object_nickname }} ({{ object_badge_number }})
+
+has joined your group
+
+{{ groupname }}
+
+and wants to be one of your roommates.
+
+If you do not wish to have that person in your group, you can log into the registration system and remove them. An automated note will be sent to that person if you do this.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-member-applied",
+		Subject:  "New group application",
+		Data: `Dear {{ nickname }}!
+
+A furry named
+
+{{ object_nickname }} ({{ object_badge_number }})
+
+has applied to your group
+
+{{ groupname }}
+
+and wants to be one of your roommates.
+
+Please log into the registration system and either accept or decline the application.
+
+If you decline, you will also have the option to prevent this furry from applying again.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-member-removed",
+		Subject:  "Group member was removed",
+		Data: `Dear {{ nickname }}!
+
+A furry named
+
+{{ object_nickname }} ({{ object_badge_number }})
+
+has been removed from your group
+
+{{ groupname }}
+
+by an administrator. This may also have happened automatically because their registration has been cancelled.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-invitation-declined",
+		Subject:  "Your group invitation was declined",
+		Data: `Dear {{ nickname }}!
+
+A furry named
+
+{{ object_nickname }} ({{ object_badge_number }})
+
+has declined your invitation to join your group
+
+{{ groupname }}.
+
+Unless you are sure this was done by mistake, please do not invite them again. Warning: Repeatedly inviting someone to a group they do not wish to be in may in extreme cases get you banned from the convention for disruptive behaviour.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-member-left",
+		Subject:  "Group member left your group",
+		Data: `Dear {{ nickname }}!
+
+A furry named
+
+{{ object_nickname }} ({{ object_badge_number }})
+
+has left your group
+
+{{ groupname }}.
+
+Unless you are sure this was done by mistake, please do not invite them again. Warning: Repeatedly inviting someone to a group they do not wish to be in may in extreme cases get you banned from the convention for disruptive behaviour.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	// roomshare groups: mails to group members
+	//
+	// nickname, groupname, owner, url (join link)
+	{
+		CommonID: "group-invited",
+		Subject:  "You have been invited to join a room sharing group",
+		Data: `Dear {{ nickname }}!
+
+A furry called
+
+{{ owner }}
+
+has invited you to join their room sharing group
+
+{{ groupname }}
+
+and wants you to be one of their roommates.
+
+You can accept or decline the invitation by clicking on this link:
+
+{{ url }}
+
+If you decline, you will also have the option to prevent this furry from inviting you again.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-application-accepted",
+		Subject:  "You have been added to a room sharing group",
+		Data: `Dear {{ nickname }}!
+
+You have been added to the room sharing group
+
+{{ groupname }}
+
+owned by a furry called
+
+{{ owner }}
+
+If you change your mind about being in the group, you can log into the registration system and leave it.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-member-kicked",
+		Subject:  "You have been removed from a room sharing group",
+		Data: `Dear {{ nickname }}!
+
+You have been removed from the room sharing group
+
+{{ groupname }}.
+
+This is normally done by the creator of the group, or in very rare cases by the admins of the registration system.
+
+Please do not simply add yourself again, but rather clear up the situation with the group creator. Warning: Repeatedly adding yourself to groups whose creators do not wish to have you in there may in extreme cases get you banned from the convention for disruptive behaviour.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-application-declined",
+		Subject:  "Room sharing group application declined",
+		Data: `Dear {{ nickname }}!
+
+Your application for the room sharing group
+
+{{ groupname }}
+
+has been declined.
+
+This is normally done by the creator of the group, or in very rare cases by the admins of the registration system.
+
+Please do not simply add yourself again, but rather clear up the situation with the group creator. Warning: Repeatedly adding yourself to groups whose creators do not wish to have you in there may in extreme cases get you banned from the convention for disruptive behaviour.
+
+Yours,
+
+The Registration Team
+`,
+	},
+	{
+		CommonID: "group-new-owner",
+		Subject:  "You are now the owner of a room sharing group",
+		Data: `Dear {{ nickname }}!
+
+A furry called
+
+{{ owner }}
+
+has made you the new owner of their room sharing group
+
+{{ groupname }}.
+
+Please log into the registration system if you wish to manage your group. 
+
+As group owner, you will be able to invite others, accept and decline pending applications, and remove group members, as well as rename the group.
+
+Yours,
+
+The Registration Team
+`,
+	},
 }
