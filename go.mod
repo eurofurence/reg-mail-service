@@ -1,6 +1,6 @@
 module github.com/eurofurence/reg-mail-service
 
-go 1.23.0
+go 1.24.3
 
 require (
 	github.com/StephanHCB/go-autumn-logging v0.4.0
