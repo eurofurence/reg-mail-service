@@ -16,7 +16,7 @@ require (
 	github.com/wneessen/go-mail v0.6.2
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.6.0
-	gorm.io/gorm v1.30.0
+	gorm.io/gorm v1.30.2
 )
 
 require (
