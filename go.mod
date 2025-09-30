@@ -1,6 +1,6 @@
 module github.com/eurofurence/reg-mail-service
 
-go 1.19
+go 1.24.0
 
 require (
 	github.com/StephanHCB/go-autumn-logging v0.4.0
@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
-	github.com/wneessen/go-mail v0.6.2
+	github.com/wneessen/go-mail v0.7.2
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.30.0
@@ -29,8 +29,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sony/gobreaker v1.0.0 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
