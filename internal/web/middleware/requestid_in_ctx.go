@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/eurofurence/reg-mail-service/internal/web/util/ctxvalues"
 	"github.com/google/uuid"
-	"net/http"
 )
 
 const TraceIdHeader = "X-Request-Id"
@@ -24,7 +25,7 @@ func AddRequestIdToContextAndResponse(next http.Handler) http.Handler {
 		}
 
 		ctx = ctxvalues.CreateContextWithValueMap(ctx)
-		ctxvalues.SetRequestId(ctx, reqIdStr)
+		ctx = ctxvalues.SetRequestId(ctx, reqIdStr)
 		w.Header().Add(TraceIdHeader, reqIdStr)
 
 		next.ServeHTTP(w, r.WithContext(ctx))

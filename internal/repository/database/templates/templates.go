@@ -2,6 +2,7 @@ package templates
 
 import (
 	"context"
+
 	aulogging "github.com/StephanHCB/go-autumn-logging"
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
@@ -236,7 +237,7 @@ Nickname                         :   {{ nickname }}
 `,
 	},
 	{
-		CommonID: "payment-cncrd-adapter-error",
+		CommonID: "payment-nexi-adapter-error",
 		Subject:  "Payment Adapter Error Notice",
 		Data: `Encountered an unexpected condition during {{ operation }}
 

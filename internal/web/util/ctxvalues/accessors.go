@@ -3,8 +3,9 @@ package ctxvalues
 import (
 	"context"
 	"fmt"
-	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 	"strings"
+
+	"github.com/eurofurence/reg-mail-service/internal/repository/config"
 )
 
 const ContextMap = "map"
@@ -50,11 +51,16 @@ func setValue(ctx context.Context, key string, value string) {
 }
 
 func RequestId(ctx context.Context) string {
-	return valueOrDefault(ctx, ContextRequestId, "00000000")
+	val, ok := ctx.Value(ContextRequestId).(string)
+	if ok {
+		return val
+	} else {
+		return "00000000"
+	}
 }
 
-func SetRequestId(ctx context.Context, requestId string) {
-	setValue(ctx, ContextRequestId, requestId)
+func SetRequestId(ctx context.Context, requestId string) context.Context {
+	return context.WithValue(ctx, ContextRequestId, requestId)
 }
 
 func IdToken(ctx context.Context) string {

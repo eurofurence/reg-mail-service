@@ -2,10 +2,11 @@ package mysqldb
 
 import (
 	"context"
-	aulogging "github.com/StephanHCB/go-autumn-logging"
-	"gorm.io/gorm/schema"
 	"net/url"
 	"time"
+
+	aulogging "github.com/StephanHCB/go-autumn-logging"
+	"gorm.io/gorm/schema"
 
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/config"
@@ -58,6 +59,7 @@ func (r *MysqlRepository) Close() {
 func (r *MysqlRepository) Migrate() error {
 	err := r.db.AutoMigrate(
 		&entity.Template{},
+		&entity.Failure{},
 		&entity.History{},
 	)
 	if err != nil {
@@ -168,4 +170,22 @@ func (r *MysqlRepository) GetTemplateByCid(ctx context.Context, cid string, lang
 		return &a, err
 	}
 	return &a, err
+}
+
+func (r *MysqlRepository) AddFailedMailRequest(ctx context.Context, entry *entity.Failure) (uint, error) {
+	err := r.db.Create(entry).Error
+	if err != nil {
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error adding failed mail request: %s", err.Error())
+	}
+	return entry.ID, err
+}
+
+func (r *MysqlRepository) GetFailedMailRequest(ctx context.Context, id uint) (*entity.Failure, error) {
+	var entry entity.Failure
+	err := r.db.First(&entry, "id = ?", id).Error
+	if err != nil {
+		aulogging.Logger.Ctx(ctx).Warn().WithErr(err).Printf("mysql error during get failed mail request: %s", err.Error())
+		return &entry, err
+	}
+	return &entry, nil
 }

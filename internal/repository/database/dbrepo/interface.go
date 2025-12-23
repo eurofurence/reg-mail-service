@@ -20,4 +20,7 @@ type Repository interface {
 	GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error)
 
 	//RecordHistory(ctx context.Context, h *entity.History) error
+
+	AddFailedMailRequest(ctx context.Context, entry *entity.Failure) (uint, error)
+	GetFailedMailRequest(ctx context.Context, id uint) (*entity.Failure, error)
 }

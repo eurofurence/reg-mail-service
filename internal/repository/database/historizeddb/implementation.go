@@ -3,6 +3,7 @@ package historizeddb
 import (
 	"context"
 	"errors"
+
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 )
@@ -48,6 +49,14 @@ func (r *HistorizingRepository) GetTemplateById(ctx context.Context, id string) 
 }
 
 func (r *HistorizingRepository) GetTemplateByCid(ctx context.Context, cid string, lang string) (*entity.Template, error) {
+	panic("implement me")
+}
+
+func (r *HistorizingRepository) AddFailedMailRequest(ctx context.Context, entry *entity.Failure) (uint, error) {
+	panic("implement me")
+}
+
+func (r *HistorizingRepository) GetFailedMailRequest(ctx context.Context, id uint) (*entity.Failure, error) {
 	panic("implement me")
 }
 

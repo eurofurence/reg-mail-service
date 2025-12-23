@@ -2,9 +2,10 @@ package ctxvalues
 
 import (
 	"context"
+	"testing"
+
 	"github.com/eurofurence/reg-mail-service/docs"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestValueMapOnEmptyContext(t *testing.T) {
@@ -15,6 +16,6 @@ func TestValueMapOnEmptyContext(t *testing.T) {
 func TestRetrieveRequestId(t *testing.T) {
 	docs.Description("it should be possible to store and retrieve a requestId in an initialized context")
 	ctx := CreateContextWithValueMap(context.TODO())
-	SetRequestId(ctx, "hallo")
+	ctx = SetRequestId(ctx, "hallo")
 	require.Equal(t, "hallo", RequestId(ctx), "unexpected value retrieving request id that was just set")
 }
