@@ -85,6 +85,9 @@ paths:
                   type: object
                   additionalProperties:
                     type: string
+                async:
+                  type: boolean
+                  default: false
       responses:
         '200':
           description: Successfully queued

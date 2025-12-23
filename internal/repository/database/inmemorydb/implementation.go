@@ -3,15 +3,20 @@ package inmemorydb
 import (
 	"context"
 	"errors"
+	"fmt"
+	"sort"
+	"sync/atomic"
+	"time"
+
 	"github.com/eurofurence/reg-mail-service/internal/entity"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/dbrepo"
 	"github.com/eurofurence/reg-mail-service/internal/repository/database/templates"
-	"sort"
-	"time"
 )
 
 type InmemoryRepository struct {
 	internalStore map[string]*entity.Template
+	idSequence    uint32
+	failures      map[uint]*entity.Failure
 }
 
 func Create() dbrepo.Repository {
@@ -120,4 +125,24 @@ func (r *InmemoryRepository) GetTemplateByCid(ctx context.Context, cid string, l
 		}
 	}
 	return &entity.Template{}, errors.New("no template found")
+}
+
+func (r *InmemoryRepository) AddFailedMailRequest(ctx context.Context, entry *entity.Failure) (uint, error) {
+	newId := uint(atomic.AddUint32(&r.idSequence, 1))
+	entry.ID = newId
+
+	// copy the entry, so later modifications won't also modify it in the simulated db
+	copiedEntry := *entry
+	copiedEntry.CreatedAt = time.Now()
+	r.failures[newId] = &copiedEntry
+	return newId, nil
+}
+
+func (r *InmemoryRepository) GetFailedMailRequest(ctx context.Context, id uint) (*entity.Failure, error) {
+	if entry, ok := r.failures[id]; ok {
+		copiedEntry := *entry
+		return &copiedEntry, nil
+	} else {
+		return &entity.Failure{}, fmt.Errorf("cannot get failed mail request for id %d - not present", id)
+	}
 }
