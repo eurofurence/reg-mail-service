@@ -2,6 +2,7 @@ package mailsrv
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"strings"
 	"time"
@@ -93,6 +94,11 @@ func syncSend(ctx context.Context, dto mail.MailSendDto, msg *gomail.Msg, body s
 		if len(config.EmailFromPassword()) > 0 {
 			opts = append(opts, gomail.WithSMTPAuth(gomail.SMTPAuthPlain), gomail.WithUsername(config.EmailFrom()), gomail.WithPassword(config.EmailFromPassword()))
 			authIs = "enabled"
+		}
+		if config.SmtpInsecureSkipVerifyTLS() {
+			opts = append(opts, gomail.WithTLSConfig(&tls.Config{
+				InsecureSkipVerify: true,
+			}))
 		}
 
 		client, err := gomail.NewClient(config.SmtpHost(), opts...)

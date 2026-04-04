@@ -66,6 +66,10 @@ func SmtpPort() int {
 	return port
 }
 
+func SmtpInsecureSkipVerifyTLS() bool {
+	return configurationData.Mail.InsecureSkipVerifyTLS
+}
+
 func DatabaseUse() DatabaseType {
 	return Configuration().Database.Use
 }

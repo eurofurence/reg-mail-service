@@ -76,15 +76,16 @@ type (
 
 	// MailConfig contains values for the mail server
 	MailConfig struct {
-		LogOnly         bool     `yaml:"log_only"`
-		DevMode         bool     `yaml:"dev_mode"`
-		DevMails        []string `yaml:"dev_mails"`
-		AddAutoBcc      string   `yaml:"add_auto_bcc"`
-		From            string   `yaml:"from"`
-		FromPass        string   `yaml:"from_password"`
-		Host            string   `yaml:"smtp_host"`
-		Port            string   `yaml:"smtp_port"`
-		MessageIdDomain string   `yaml:"message_id_domain"`
+		LogOnly               bool     `yaml:"log_only"`
+		DevMode               bool     `yaml:"dev_mode"`
+		DevMails              []string `yaml:"dev_mails"`
+		AddAutoBcc            string   `yaml:"add_auto_bcc"`
+		From                  string   `yaml:"from"`
+		FromPass              string   `yaml:"from_password"`
+		Host                  string   `yaml:"smtp_host"`
+		Port                  string   `yaml:"smtp_port"`
+		MessageIdDomain       string   `yaml:"message_id_domain"`
+		InsecureSkipVerifyTLS bool     `yaml:"insecure_skip_verify_tls"`
 	}
 )
 
