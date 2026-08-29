@@ -3,5 +3,5 @@
 main
 reg-mail-service
 **/*.swp
-config.yaml
+config*.yaml
 assets/cache
